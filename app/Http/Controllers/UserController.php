@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -22,9 +22,10 @@ class UserController extends Controller
         $phone = $request->phone;
         $role = (isset($request->role)) ? $request->role : 3;
 
-        $check_mail = $this->uniqidEmail($email);
-        if ($check_mail) {
-            return response()->json(['success' => false, 'message' => 'Email has already been used']);
+        $check_mail = $this->uniqEmail($email);
+        $check_user = $this->uniqUser($username);
+        if ($check_mail || $check_user) {
+            return response()->json(['success' => false, 'message' => 'Username or Email has already been used']);
         }
 
         try {
@@ -49,7 +50,7 @@ class UserController extends Controller
         }
 
     }
-    public function uniqidEmail($mail)
+    public function uniqEmail($mail)
     {
         $count = User::where('email', $mail)->count();
         if ($count > 0) {
@@ -58,26 +59,38 @@ class UserController extends Controller
             return false;
         }
     }
+    public function uniqUser($user)
+    {
+        $count = User::where('username', $user)->count();
+        if ($count > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             return response()->json([
-             'message' => 'Login information is invalid.'
-           ], 401);
-     }
+                'success' => false,
+                'message' => 'Login information is invalid.',
+            ]);
+        }
 
-     $user = User::where('email', $request['email'])->firstOrFail();
-     $check_user_token = DB::table('personal_access_tokens')->where('tokenable_id',$user->id)->first();
-     if(!empty($check_user_token)){
-        DB::table('personal_access_tokens')->where('tokenable_id',$user->id)->delete();
-     }
-     $token = $user->createToken('authToken')->plainTextToken;
-    
-    
+        $user = User::where('username', $request->username)->firstOrFail();
+        $check_user_token = DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->first();
+        if (!empty($check_user_token)) {
+            DB::table('personal_access_tokens')->where('tokenable_id', $user->id)->delete();
+        }
+        $token = $user->createToken('authToken')->plainTextToken;
 
-
-         return response()->json([
-         'token' => $token,
-         ]);
+        return response()->json([
+            'token' => $token,
+            'success' => true,
+        ]);
+    }
+    public function username()
+    {
+        return 'username';
     }
 }
