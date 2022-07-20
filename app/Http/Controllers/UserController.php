@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -56,5 +57,27 @@ class UserController extends Controller
         } else {
             return false;
         }
+    }
+    public function login(Request $request)
+    {
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+             'message' => 'Login information is invalid.'
+           ], 401);
+     }
+
+     $user = User::where('email', $request['email'])->firstOrFail();
+     $check_user_token = DB::table('personal_access_tokens')->where('tokenable_id',$user->id)->first();
+     if(!empty($check_user_token)){
+        DB::table('personal_access_tokens')->where('tokenable_id',$user->id)->delete();
+     }
+     $token = $user->createToken('authToken')->plainTextToken;
+    
+    
+
+
+         return response()->json([
+         'token' => $token,
+         ]);
     }
 }
