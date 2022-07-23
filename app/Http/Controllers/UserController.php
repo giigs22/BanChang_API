@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ImageProfile;
+use App\Models\Role;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Storage;
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -21,6 +23,8 @@ class UserController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         $role = (isset($request->role)) ? $request->role : 3;
+        $status = (isset($request->status))? $request->status:1;
+        $profile = $request->profile;
 
         $check_mail = $this->uniqEmail($email);
         $check_user = $this->uniqUser($username);
@@ -28,6 +32,7 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Username or Email has already been used']);
         }
 
+    
         try {
             $add = new User();
             $add->idcard = $idcard;
@@ -37,15 +42,20 @@ class UserController extends Controller
             $add->location = $location;
             $add->email = $email;
             $add->phone = $phone;
+            $add->status = $status;
             $add->save();
 
             DB::table('users_roles')->insert(['user_id' => $add->id, 'role_id' => $role]);
+
+            //Upload Image Profile
+            $this->uploadProfile($add->id,$profile);
 
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Register Successfully.']);
             }
 
         } catch (Exception $e) {
+            
             return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
 
@@ -92,5 +102,25 @@ class UserController extends Controller
     public function username()
     {
         return 'username';
+    }
+    public function role_user()
+    {
+        return Role::all();
+    }
+    public function uploadProfile($id,$file)
+    {
+        $base64Image = explode(";base64,", $file);
+        $explodeImage = explode("image/", $base64Image[0]);
+        $imageType = $explodeImage[1];
+        $image_base64 = base64_decode($base64Image[1]);
+        $file_decode = uniqid() . '.' . $imageType;
+
+        Storage::disk('public_upload')->put($file_decode, $image_base64);
+
+        $add = new ImageProfile();
+        $add->user_id = $id;
+        $add->filename = $file_decode;
+        $add->save();
+
     }
 }
