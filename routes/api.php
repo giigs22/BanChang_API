@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware'=>'auth:sanctum'],function(){
     Route::post('logger',[LogController::class,'save_log']);
     Route::get('role',[UserController::class,'role_user']);
+    Route::post('alluser',[UserController::class,'all_user']);
 });
 
 Route::post('login',[UserController::class,'login']);

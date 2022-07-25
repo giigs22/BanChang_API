@@ -16,6 +16,7 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $idcard = $request->idcard;
+        $name = $request->name;
         $username = $request->username;
         $password = $request->password;
         $position = $request->position;
@@ -23,7 +24,7 @@ class UserController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         $role = (isset($request->role)) ? $request->role : 3;
-        $status = (isset($request->status))? $request->status:1;
+        $status = (isset($request->status))? $request->status:'1';
         $profile = $request->profile;
 
         $check_mail = $this->uniqEmail($email);
@@ -36,6 +37,7 @@ class UserController extends Controller
         try {
             $add = new User();
             $add->idcard = $idcard;
+            $add->name = $name;
             $add->username = $username;
             $add->password = Hash::make($password);
             $add->position = $position;
@@ -122,5 +124,49 @@ class UserController extends Controller
         $add->filename = $file_decode;
         $add->save();
 
+    }
+    public function all_user(Request $request)
+    {
+        // $user = User::with('roles')->get();
+        // $list_user = [];
+        // foreach ($user as $key => $value) {
+        //     $data['id'] = $value->id;
+        //     $data['register_date'] = $value->created_at;
+        //     $data['name'] = $value->name;
+        //     $data['username'] = $value->username;
+        //     $data['role'] = $value->roles[0]->name;
+        //     $data['status'] = $value->status;
+        //     $list_user[] = $data;
+        // }
+        // return response()->json($list_user);
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
+        $filter = $request->filter;
+
+        $user =  User::orderBy('id', 'ASC');
+        $count_all = $user->count();
+        if (!empty($start) || !empty($itemPerpage)) {
+            $user = $user->offset($start);
+            $user = $user->limit($itemPerpage)->get();
+        } else {
+            $user = $user->get();
+        }
+
+        $list_user = [];
+        foreach ($user as $key => $value) {
+            $data['id'] = $value->id;
+            $data['register_date'] = $value->created_at;
+            $data['name'] = $value->name;
+            $data['username'] = $value->username;
+            $data['role'] = $value->roles[0]->name;
+            $data['status'] = $value->status;
+            $list_user[] = $data;
+        }
+
+        $data_ = [];
+        $data_['list_user'] = $list_user;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
     }
 }
