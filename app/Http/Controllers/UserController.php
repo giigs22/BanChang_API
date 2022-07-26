@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -24,7 +25,7 @@ class UserController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         $role = (isset($request->role)) ? $request->role : 3;
-        $status = (isset($request->status))? $request->status:'1';
+        $status = (isset($request->status)) ? $request->status : '1';
         $profile = $request->profile;
 
         $check_mail = $this->uniqEmail($email);
@@ -33,7 +34,6 @@ class UserController extends Controller
             return response()->json(['success' => false, 'message' => 'Username or Email has already been used']);
         }
 
-    
         try {
             $add = new User();
             $add->idcard = $idcard;
@@ -50,14 +50,14 @@ class UserController extends Controller
             DB::table('users_roles')->insert(['user_id' => $add->id, 'role_id' => $role]);
 
             //Upload Image Profile
-            $this->uploadProfile($add->id,$profile);
+            $this->uploadProfile($add->id, $profile);
 
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Register Successfully.']);
             }
 
         } catch (Exception $e) {
-            
+
             return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
 
@@ -109,7 +109,7 @@ class UserController extends Controller
     {
         return Role::all();
     }
-    public function uploadProfile($id,$file)
+    public function uploadProfile($id, $file)
     {
         $base64Image = explode(";base64,", $file);
         $explodeImage = explode("image/", $base64Image[0]);
@@ -127,23 +127,11 @@ class UserController extends Controller
     }
     public function all_user(Request $request)
     {
-        // $user = User::with('roles')->get();
-        // $list_user = [];
-        // foreach ($user as $key => $value) {
-        //     $data['id'] = $value->id;
-        //     $data['register_date'] = $value->created_at;
-        //     $data['name'] = $value->name;
-        //     $data['username'] = $value->username;
-        //     $data['role'] = $value->roles[0]->name;
-        //     $data['status'] = $value->status;
-        //     $list_user[] = $data;
-        // }
-        // return response()->json($list_user);
         $itemPerpage = $request->itemperpage;
         $start = $request->start;
         $filter = $request->filter;
 
-        $user =  User::orderBy('id', 'ASC');
+        $user = User::orderBy('id', 'ASC');
         $count_all = $user->count();
         if (!empty($start) || !empty($itemPerpage)) {
             $user = $user->offset($start);
@@ -168,5 +156,13 @@ class UserController extends Controller
         $data_['count_all'] = $count_all;
 
         return response()->json($data_);
+    }
+    public function user_profile(Request $request)
+    {
+        $id = $request->id;
+        $user = User::with('roles')->find($id);
+        $img_profile = ImageProfile::where('user_id', $id)->first();
+        $img_url = Storage::disk('public_upload')->url($img_profile->filename);
+        return response()->json(['data' => $user, 'img_profile' => $img_url]);
     }
 }
