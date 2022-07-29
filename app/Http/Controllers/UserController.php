@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,7 +34,7 @@ class UserController extends Controller
         if ($check_mail || $check_user) {
             return response()->json(['success' => false, 'message' => 'Username or Email has already been used']);
         }
-
+        DB::beginTransaction();
         try {
             $add = new User();
             $add->idcard = $idcard;
@@ -51,13 +52,13 @@ class UserController extends Controller
 
             //Upload Image Profile
             $this->uploadProfile($add->id, $profile);
-
+            DB::commit();
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Register Successfully.']);
             }
-
-        } catch (Exception $e) {
-
+           
+        } catch (Exception $e) {    
+            DB::rollBack();
             return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
 
@@ -119,10 +120,17 @@ class UserController extends Controller
 
         Storage::disk('public_upload')->put($file_decode, $image_base64);
 
-        $add = new ImageProfile();
-        $add->user_id = $id;
-        $add->filename = $file_decode;
-        $add->save();
+        $hasimg = ImageProfile::where('user_id',$id)->first();
+        if(!empty($hasimg)){
+            Storage::disk('public_upload')->delete($hasimg->filename, File::delete($hasimg->filename));
+            $hasimg->filename = $file_decode;
+            $hasimg->save();
+        }else{
+            $add = new ImageProfile();
+            $add->user_id = $id;
+            $add->filename = $file_decode;
+            $add->save();
+        }
 
     }
     public function all_user(Request $request)
@@ -164,5 +172,68 @@ class UserController extends Controller
         $img_profile = ImageProfile::where('user_id', $id)->first();
         $img_url = Storage::disk('public_upload')->url($img_profile->filename);
         return response()->json(['data' => $user, 'img_profile' => $img_url]);
+    }
+    public function user_update(Request $request)
+    {
+        $id = $request->id;
+        $idcard = $request->idcard;
+        $name = $request->name;
+        $username = $request->username;
+        $password = $request->password;
+        $position = $request->position;
+        $location = $request->location;
+        $email = $request->email;
+        $phone = $request->phone;
+        $role = (isset($request->role)) ? $request->role : 3;
+        $status = (isset($request->status)) ? $request->status : '1';
+        $profile = $request->profile;
+        
+        DB::beginTransaction();
+        try {
+            $update = User::find($id);
+            $update->idcard = $idcard;
+            $update->name = $name;
+            $update->username = $username;
+            if(!empty($password)){
+                $update->password = Hash::make($password);
+            }
+            $update->position = $position;
+            $update->location = $location;
+            $update->email = $email;
+            $update->phone = $phone;
+            $update->status = $status;
+            $update->save();
+    
+            $db_role = DB::table('users_roles')->where('user_id',$id)->first();
+            if($db_role->role_id !== $role){
+                DB::table('users_roles')->where('user_id',$id)->update(['role_id'=>$role]);
+            }
+    
+            if(!empty($profile)){
+                $db_img = ImageProfile::where('user_id',$id)->first();
+                Storage::disk('public_upload')->delete($db_img->filename, File::delete($db_img->filename));
+    
+                $this->uploadProfile($id, $profile);
+            }
+            DB::commit();
+            if ($update) {
+                return response()->json(['success' => true, 'message' => 'Register Successfully.']);
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(["success" => false, "message" => $e->getMessage()]);
+        }
+    }
+    public function user_destroy(Request $request,$id)
+    {
+        $del = User::find($id);
+        $img = ImageProfile::where('user_id',$id)->first();
+        Storage::disk('public_upload')->delete($img->filename, File::delete($img->filename));
+        
+        $del->delete();
+        if($del){
+            return response()->json(['success'=>true,'message'=>'Data has been Delete Successfully.']);
+        }
+
     }
 }

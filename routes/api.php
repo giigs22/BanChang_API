@@ -24,6 +24,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('role', [UserController::class, 'role_user']);
     Route::post('alluser', [UserController::class, 'all_user']);
     Route::get('user_profile/{id}', [UserController::class, 'user_profile']);
+    Route::patch('user_profile/update/{id}',[UserController::class,'user_update']);
+    Route::delete('user_profile/destroy/{id}',[UserController::class,'user_destroy']);
 });
 
 Route::post('login', [UserController::class, 'login']);
