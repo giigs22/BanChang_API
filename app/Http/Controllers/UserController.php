@@ -239,11 +239,16 @@ class UserController extends Controller
     public function user_by_id(Request $request)
     {
         $user = $request->user();
-        $data['user'] = $user;
-        $id = $user->id;
-        $img_profile = ImageProfile::where('user_id', $id)->first();
-        //$img_url = Storage::disk('public_upload')->url($img_profile->filename);
-        //$data['img_profile'] = $img_url;
-        return $img_profile;
+        $data['data']['id'] = $user->id;
+        $data['data']['name'] = $user->name;
+        $img_profile = ImageProfile::where('user_id', $user->id)->first();
+        if(!empty($img_profile)){
+            $img_url = Storage::disk('public_upload')->url($img_profile->filename);
+
+        }else{
+            $img_url= null;
+        }
+        $data['img_profile'] = $img_url;
+        return $data;
     }
 }
