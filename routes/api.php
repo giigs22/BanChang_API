@@ -3,9 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,12 +20,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('role', [UserController::class, 'role_user']);
     Route::post('alluser', [UserController::class, 'all_user']);
     Route::get('user_profile/{id}', [UserController::class, 'user_profile']);
-    Route::patch('user_profile/update/{id}',[UserController::class,'user_update']);
-    Route::delete('user_profile/destroy/{id}',[UserController::class,'user_destroy']);
-    Route::get('user',[UserController::class,'user_by_id']);
-    
+    Route::patch('user_profile/update/{id}', [UserController::class, 'user_update']);
+    Route::delete('user_profile/destroy/{id}', [UserController::class, 'user_destroy']);
+    Route::get('user', [UserController::class, 'user_by_id']);
+
     Route::group(['prefix' => 'dashboard'], function () {
-        Route::post('store',[DashboardController::class,'store']);
+        Route::post('store', [DashboardController::class, 'store']);
+        Route::get('list', [DashboardController::class, 'list_template']);
     });
 });
 

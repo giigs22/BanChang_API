@@ -14,31 +14,35 @@ class DashboardController extends Controller
         $widget = $request->widget;
 
         $check_name = $this->checkName($name);
-        if($check_name){
+        if ($check_name) {
             try {
                 $template = new Template();
                 $template->name = $name;
                 $template->save();
 
                 $template->widgets()->sync($widget);
-                if($template){
-                    return response()->json(['success'=>true,'message'=>'Create Template Successfully']);
+                if ($template) {
+                    return response()->json(['success' => true, 'message' => 'Create Template Successfully']);
                 }
             } catch (Exception $e) {
-                return response()->json(['success'=>false,'messsage'=>$e->getMessage()]);
+                return response()->json(['success' => false, 'messsage' => $e->getMessage()]);
             }
-       
-        }else{
-            return response()->json(['success'=>false,'message'=>'This Name is Already Use.']);
+
+        } else {
+            return response()->json(['success' => false, 'message' => 'This Name is Already Use.']);
         }
     }
     public function checkName($name)
     {
-        $count =  Template::where('name',$name)->count();
-        if($count > 0){
+        $count = Template::where('name', $name)->count();
+        if ($count > 0) {
             return false;
-        }else{
+        } else {
             return true;
         }
+    }
+    public function list_template(Request $request)
+    {
+        return Template::all();
     }
 }
