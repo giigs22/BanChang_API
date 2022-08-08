@@ -26,7 +26,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'dashboard'], function () {
         Route::post('store', [DashboardController::class, 'store']);
-        Route::get('list', [DashboardController::class, 'list_template']);
+        Route::post('list', [DashboardController::class, 'list_template']);
     });
 });
 

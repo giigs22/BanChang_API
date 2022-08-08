@@ -43,6 +43,29 @@ class DashboardController extends Controller
     }
     public function list_template(Request $request)
     {
-        return Template::all();
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
+
+        $temp = Template::orderBy('id', 'ASC');
+        $count_all = $temp->count();
+        if (!empty($start) || !empty($itemPerpage)) {
+            $temp = $temp->offset($start);
+            $temp = $temp->limit($itemPerpage)->get();
+        } else {
+            $temp = $temp->get();
+        }
+
+        $list = [];
+        foreach ($temp as $key => $value) {
+            $data['id'] = $value->id;
+            $data['name'] = $value->name;
+            $list[] = $data;
+        }
+
+        $data_ = [];
+        $data_['list'] = $list;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
     }
 }
