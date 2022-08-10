@@ -17,7 +17,7 @@ class CreateTemplateWidgetRelationsTable extends Migration
             $table->unsignedBigInteger('template_id');
             $table->unsignedBigInteger('widget_id');
 
-            $table->foreign('template_id')->references('id')->on('templates')->onDelete('cascade');
+            $table->foreign('template_id')->references('id')->on('templates');
 
         });
     }

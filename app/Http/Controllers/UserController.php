@@ -56,8 +56,8 @@ class UserController extends Controller
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Register Successfully.']);
             }
-           
-        } catch (Exception $e) {    
+
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
@@ -110,6 +110,32 @@ class UserController extends Controller
     {
         return Role::all();
     }
+    public function all_role(Request $request)
+    {
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
+
+        $role = Role::orderBy('id', 'ASC');
+        $count_all = $role->count();
+        if (!empty($start) || !empty($itemPerpage)) {
+            $role = $role->offset($start);
+            $role = $role->limit($itemPerpage)->get();
+        } else {
+            $role = $role->get();
+        }
+        $list = [];
+        foreach ($role as $key => $value) {
+            $data['id'] = $value->id;
+            $data['name'] = $value->name;
+            $list[] = $data;
+        }
+
+        $data_ = [];
+        $data_['list'] = $list;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
+    }
     public function uploadProfile($id, $file)
     {
         $base64Image = explode(";base64,", $file);
@@ -120,12 +146,12 @@ class UserController extends Controller
 
         Storage::disk('public_upload')->put($file_decode, $image_base64);
 
-        $hasimg = ImageProfile::where('user_id',$id)->first();
-        if(!empty($hasimg)){
+        $hasimg = ImageProfile::where('user_id', $id)->first();
+        if (!empty($hasimg)) {
             Storage::disk('public_upload')->delete($hasimg->filename, File::delete($hasimg->filename));
             $hasimg->filename = $file_decode;
             $hasimg->save();
-        }else{
+        } else {
             $add = new ImageProfile();
             $add->user_id = $id;
             $add->filename = $file_decode;
@@ -187,14 +213,14 @@ class UserController extends Controller
         $role = (isset($request->role)) ? $request->role : 3;
         $status = (isset($request->status)) ? $request->status : '1';
         $profile = $request->profile;
-        
+
         DB::beginTransaction();
         try {
             $update = User::find($id);
             $update->idcard = $idcard;
             $update->name = $name;
             $update->username = $username;
-            if(!empty($password)){
+            if (!empty($password)) {
                 $update->password = Hash::make($password);
             }
             $update->position = $position;
@@ -203,36 +229,36 @@ class UserController extends Controller
             $update->phone = $phone;
             $update->status = $status;
             $update->save();
-    
-            $db_role = DB::table('users_roles')->where('user_id',$id)->first();
-            if($db_role->role_id !== $role){
-                DB::table('users_roles')->where('user_id',$id)->update(['role_id'=>$role]);
+
+            $db_role = DB::table('users_roles')->where('user_id', $id)->first();
+            if ($db_role->role_id !== $role) {
+                DB::table('users_roles')->where('user_id', $id)->update(['role_id' => $role]);
             }
-    
-            if(!empty($profile)){
-                $db_img = ImageProfile::where('user_id',$id)->first();
+
+            if (!empty($profile)) {
+                $db_img = ImageProfile::where('user_id', $id)->first();
                 Storage::disk('public_upload')->delete($db_img->filename, File::delete($db_img->filename));
-    
+
                 $this->uploadProfile($id, $profile);
             }
             DB::commit();
             if ($update) {
-                return response()->json(['success' => true, 'message' => 'Register Successfully.']);
+                return response()->json(['success' => true, 'message' => 'Update Successfully.']);
             }
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
     }
-    public function user_destroy(Request $request,$id)
+    public function user_destroy(Request $request, $id)
     {
         $del = User::find($id);
-        $img = ImageProfile::where('user_id',$id)->first();
+        $img = ImageProfile::where('user_id', $id)->first();
         Storage::disk('public_upload')->delete($img->filename, File::delete($img->filename));
-        
+
         $del->delete();
-        if($del){
-            return response()->json(['success'=>true,'message'=>'Data has been Delete Successfully.']);
+        if ($del) {
+            return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
         }
 
     }
@@ -242,11 +268,11 @@ class UserController extends Controller
         $data['data']['id'] = $user->id;
         $data['data']['name'] = $user->name;
         $img_profile = ImageProfile::where('user_id', $user->id)->first();
-        if(!empty($img_profile)){
+        if (!empty($img_profile)) {
             $img_url = Storage::disk('public_upload')->url($img_profile->filename);
 
-        }else{
-            $img_url= null;
+        } else {
+            $img_url = null;
         }
         $data['img_profile'] = $img_url;
         return $data;

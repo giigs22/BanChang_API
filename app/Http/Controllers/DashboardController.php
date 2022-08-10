@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Template;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -67,5 +68,37 @@ class DashboardController extends Controller
         $data_['count_all'] = $count_all;
 
         return response()->json($data_);
+    }
+    public function template_by_id(Request $request)
+    {
+        $data = Template::with('widgets')->find($request->id);
+        return response()->json($data);
+    }
+    public function update(Request $request)
+    {
+        $id = $request->id;
+        $name = $request->name;
+        $widget = $request->widget;
+
+        try {
+            $update = Template::find($id);
+            $update->name = $name;
+            $update->save();
+
+            DB::table('template_widget_relations')->where('template_id', $id)->delete();
+
+            $update->widgets()->sync($widget);
+
+            return response()->json(['success' => true, 'message' => 'Update Successfully']);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+    }
+    public function destroy(Request $request)
+    {
+        $id = $request->id;
+        $data = $request->data;
+
     }
 }
