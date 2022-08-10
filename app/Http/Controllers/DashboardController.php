@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\Template;
 use Exception;
 use Illuminate\Http\Request;
@@ -99,6 +100,52 @@ class DashboardController extends Controller
     {
         $id = $request->id;
         $data = $request->data;
+
+    }
+    public function group_user_temp(Request $request)
+    {
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
+
+        $role = Role::with('templates')->orderBy('id', 'ASC');
+        $count_all = $role->count();
+        if (!empty($start) || !empty($itemPerpage)) {
+            $role = $role->offset($start);
+            $role = $role->limit($itemPerpage)->get();
+        } else {
+            $role = $role->get();
+        }
+
+        $data_ = [];
+        $data_['list'] = $role;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
+
+        //return Role::with('templates')->get();
+    }
+    public function update_group(Request $request)
+    {
+        $role_id = $request->role_id;
+        $temp_id = $request->temp_id;
+        
+        try {
+            $chk = DB::table('roles_templates')->where('role_id',$role_id)->count();
+            if($chk > 0){
+                DB::table('roles_templates')->where('role_id',$role_id)->update(['template_id'=>$temp_id]);
+            }else{
+                DB::table('roles_templates')->insert([
+                    'role_id'=>$role_id,
+                    'template_id'=>$temp_id
+                ]);
+            }
+            return response()->json(['success'=>true,'message'=>'Setting Template Successfully']);
+
+        } catch (Exception $e) {
+            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+        }
+
+       
 
     }
 }

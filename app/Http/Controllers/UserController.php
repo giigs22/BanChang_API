@@ -106,36 +106,6 @@ class UserController extends Controller
     {
         return 'username';
     }
-    public function role_user()
-    {
-        return Role::all();
-    }
-    public function all_role(Request $request)
-    {
-        $itemPerpage = $request->itemperpage;
-        $start = $request->start;
-
-        $role = Role::orderBy('id', 'ASC');
-        $count_all = $role->count();
-        if (!empty($start) || !empty($itemPerpage)) {
-            $role = $role->offset($start);
-            $role = $role->limit($itemPerpage)->get();
-        } else {
-            $role = $role->get();
-        }
-        $list = [];
-        foreach ($role as $key => $value) {
-            $data['id'] = $value->id;
-            $data['name'] = $value->name;
-            $list[] = $data;
-        }
-
-        $data_ = [];
-        $data_['list'] = $list;
-        $data_['count_all'] = $count_all;
-
-        return response()->json($data_);
-    }
     public function uploadProfile($id, $file)
     {
         $base64Image = explode(";base64,", $file);

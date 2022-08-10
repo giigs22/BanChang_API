@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,13 +18,22 @@ use Illuminate\Support\Facades\Route;
  */
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logger', [LogController::class, 'save_log']);
-    Route::get('role', [UserController::class, 'role_user']);
-    Route::post('allrole', [UserController::class, 'all_role']);
-    Route::post('alluser', [UserController::class, 'all_user']);
-    Route::get('user_profile/{id}', [UserController::class, 'user_profile']);
-    Route::patch('user_profile/update/{id}', [UserController::class, 'user_update']);
-    Route::delete('user_profile/destroy/{id}', [UserController::class, 'user_destroy']);
-    Route::get('user', [UserController::class, 'user_by_id']);
+    
+    Route::group(['prefix' => 'users'], function () {
+        Route::post('alluser', [UserController::class, 'all_user']);
+        Route::get('profile/{id}', [UserController::class, 'user_profile']);
+        Route::patch('profile/update/{id}', [UserController::class, 'user_update']);
+        Route::delete('profile/destroy/{id}', [UserController::class, 'user_destroy']);
+        Route::get('user', [UserController::class, 'user_by_id']);
+    });
+    Route::group(['prefix' => 'roles'], function () {
+        Route::get('role', [RoleController::class, 'role_user']);
+        Route::post('allrole', [RoleController::class, 'all_role']);
+        Route::post('store',[RoleController::class,'store']);
+        Route::get('{id}',[RoleController::class,'role_by_id']);
+        Route::patch('update/{id}',[RoleController::class,'update']);
+        Route::post('destroy',[RoleController::class,'destroy']);
+    });
 
     Route::group(['prefix' => 'dashboard'], function () {
         Route::post('store', [DashboardController::class, 'store']);
@@ -31,6 +41,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('template/{id}', [DashboardController::class, 'template_by_id']);
         Route::patch('update/{id}', [DashboardController::class, 'update']);
         Route::post('destroy', [DashboardController::class, 'destroy']);
+        Route::get('group_user_temp',[DashboardController::class,'group_user_temp']);
+        Route::post('update_group',[DashboardController::class,'update_group']);
     });
 });
 
