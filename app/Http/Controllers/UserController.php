@@ -51,7 +51,15 @@ class UserController extends Controller
             DB::table('users_roles')->insert(['user_id' => $add->id, 'role_id' => $role]);
 
             //Upload Image Profile
-            $this->uploadProfile($add->id, $profile);
+            if (!empty($profile)) {
+                $this->uploadProfile($add->id, $profile);
+            }
+
+            //Set Template
+            $set_temp = $this->setTemplate($add->id, $role);
+            if (!$set_temp) {
+                return response()->json(['success' => false, 'message' => 'Group User Not Setup Template']);
+            }
             DB::commit();
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Register Successfully.']);
@@ -59,7 +67,8 @@ class UserController extends Controller
 
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(["success" => false, "message" => $e->getMessage()]);
+            return $e;
+            //return response()->json(["success" => false, "message" => $e->getMessage()]);
         }
 
     }
@@ -166,7 +175,11 @@ class UserController extends Controller
         $id = $request->id;
         $user = User::with('roles')->find($id);
         $img_profile = ImageProfile::where('user_id', $id)->first();
-        $img_url = Storage::disk('public_upload')->url($img_profile->filename);
+        if (!empty($img_profile)) {
+            $img_url = Storage::disk('public_upload')->url($img_profile->filename);
+        } else {
+            $img_url = null;
+        }
         return response()->json(['data' => $user, 'img_profile' => $img_url]);
     }
     public function user_update(Request $request)
@@ -246,5 +259,19 @@ class UserController extends Controller
         }
         $data['img_profile'] = $img_url;
         return $data;
+    }
+    public function setTemplate($user_id, $role_id)
+    {
+        $role = Role::with('templates')->find($role_id);
+
+        if (!empty($role->templates[0])) {
+            DB::table('users_templates')->insert([
+                'user_id' => $user_id,
+                'template_id' => $role->templates[0]->id,
+            ]);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

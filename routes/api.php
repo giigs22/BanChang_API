@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
  */
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logger', [LogController::class, 'save_log']);
-    
+
     Route::group(['prefix' => 'users'], function () {
         Route::post('alluser', [UserController::class, 'all_user']);
         Route::get('profile/{id}', [UserController::class, 'user_profile']);
@@ -29,10 +29,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'roles'], function () {
         Route::get('role', [RoleController::class, 'role_user']);
         Route::post('allrole', [RoleController::class, 'all_role']);
-        Route::post('store',[RoleController::class,'store']);
-        Route::get('{id}',[RoleController::class,'role_by_id']);
-        Route::patch('update/{id}',[RoleController::class,'update']);
-        Route::post('destroy',[RoleController::class,'destroy']);
+        Route::post('store', [RoleController::class, 'store']);
+        Route::get('{id}', [RoleController::class, 'role_by_id']);
+        Route::patch('update/{id}', [RoleController::class, 'update']);
+        Route::post('destroy', [RoleController::class, 'destroy']);
     });
 
     Route::group(['prefix' => 'dashboard'], function () {
@@ -41,8 +41,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('template/{id}', [DashboardController::class, 'template_by_id']);
         Route::patch('update/{id}', [DashboardController::class, 'update']);
         Route::post('destroy', [DashboardController::class, 'destroy']);
-        Route::get('group_user_temp',[DashboardController::class,'group_user_temp']);
-        Route::post('update_group',[DashboardController::class,'update_group']);
+        Route::get('group_user_temp', [DashboardController::class, 'group_user_temp']);
+        Route::get('user_temp', [DashboardController::class, 'user_temp']);
+        Route::post('update_group', [DashboardController::class, 'update_group']);
+        Route::post('update_user', [DashboardController::class, 'update_user']);
+
     });
 });
 

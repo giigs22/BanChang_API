@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\Template;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +102,23 @@ class DashboardController extends Controller
         $id = $request->id;
         $data = $request->data;
 
+        DB::beginTransaction();
+        try {
+            DB::table('roles_templates')->where('template_id', $id)->update(['template_id' => $data]);
+            DB::table('users_templates')->where('template_id', $id)->update(['template_id' => $data]);
+
+            $temp = Template::find($id);
+            $temp->delete();
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+
+        }
+
     }
     public function group_user_temp(Request $request)
     {
@@ -121,31 +139,70 @@ class DashboardController extends Controller
         $data_['count_all'] = $count_all;
 
         return response()->json($data_);
+    }
+    public function user_temp(Request $request)
+    {
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
 
-        //return Role::with('templates')->get();
+        $role = User::with('templates')->orderBy('id', 'ASC');
+        $count_all = $role->count();
+        if (!empty($start) || !empty($itemPerpage)) {
+            $role = $role->offset($start);
+            $role = $role->limit($itemPerpage)->get();
+        } else {
+            $role = $role->get();
+        }
+
+        $data_ = [];
+        $data_['list'] = $role;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
+
     }
     public function update_group(Request $request)
     {
         $role_id = $request->role_id;
         $temp_id = $request->temp_id;
-        
+
         try {
-            $chk = DB::table('roles_templates')->where('role_id',$role_id)->count();
-            if($chk > 0){
-                DB::table('roles_templates')->where('role_id',$role_id)->update(['template_id'=>$temp_id]);
-            }else{
+            $chk = DB::table('roles_templates')->where('role_id', $role_id)->count();
+            if ($chk > 0) {
+                DB::table('roles_templates')->where('role_id', $role_id)->update(['template_id' => $temp_id]);
+            } else {
                 DB::table('roles_templates')->insert([
-                    'role_id'=>$role_id,
-                    'template_id'=>$temp_id
+                    'role_id' => $role_id,
+                    'template_id' => $temp_id,
                 ]);
             }
-            return response()->json(['success'=>true,'message'=>'Setting Template Successfully']);
+            return response()->json(['success' => true, 'message' => 'Setting Template Successfully']);
 
         } catch (Exception $e) {
-            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
 
-       
+    }
+    public function update_user(Request $request)
+    {
+        $user_id = $request->user_id;
+        $temp_id = $request->temp_id;
+
+        try {
+            $chk = DB::table('users_templates')->where('user_id', $user_id)->count();
+            if ($chk > 0) {
+                DB::table('users_templates')->where('user_id', $user_id)->update(['template_id' => $temp_id]);
+            } else {
+                DB::table('users_templates')->insert([
+                    'user_id' => $user_id,
+                    'template_id' => $temp_id,
+                ]);
+            }
+            return response()->json(['success' => true, 'message' => 'Setting Template Successfully']);
+
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
 
     }
 }
