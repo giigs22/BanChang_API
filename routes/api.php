@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WidgetController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -45,7 +46,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('user_temp', [DashboardController::class, 'user_temp']);
         Route::post('update_group', [DashboardController::class, 'update_group']);
         Route::post('update_user', [DashboardController::class, 'update_user']);
+    });
 
+    Route::group(['prefix' => 'widget'], function () {
+        Route::post('list', [WidgetController::class, 'list_widget']);
+        Route::post('addcate',[WidgetController::class,'addcate']);
     });
 });
 
