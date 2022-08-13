@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -50,7 +51,18 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'widget'], function () {
         Route::post('list', [WidgetController::class, 'list_widget']);
-        Route::post('addcate',[WidgetController::class,'addcate']);
+        Route::get('listall', [WidgetController::class, 'list_widget_all']);
+        Route::post('addcate', [WidgetController::class, 'addcate']);
+        Route::post('updatecate', [WidgetController::class, 'updatecate']);
+        Route::post('destroy', [WidgetController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'device'], function () {
+        Route::post('store', [DeviceController::class, 'store']);
+        Route::post('list', [DeviceController::class, 'list_device']);
+        Route::get('{id}', [DeviceController::class, 'device_by_id']);
+        Route::patch('update/{id}', [DeviceController::class, 'update']);
+        Route::delete('destroy/{id}', [DeviceController::class, 'destroy']);
     });
 });
 
