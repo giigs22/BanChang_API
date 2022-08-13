@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WidgetController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Route;
  */
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logger', [LogController::class, 'save_log']);
+    Route::post('setting/update',[SettingController::class,'update']);
+    Route::get('setting/list',[SettingController::class,'getlist']);
 
     Route::group(['prefix' => 'users'], function () {
         Route::post('alluser', [UserController::class, 'all_user']);
