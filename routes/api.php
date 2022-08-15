@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Route;
  */
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('logger', [LogController::class, 'save_log']);
-    Route::post('setting/update',[SettingController::class,'update']);
-    Route::get('setting/list',[SettingController::class,'getlist']);
+    Route::post('setting/update', [SettingController::class, 'update']);
+    Route::get('setting/list', [SettingController::class, 'getlist']);
 
     Route::group(['prefix' => 'users'], function () {
         Route::post('alluser', [UserController::class, 'all_user']);
@@ -66,8 +66,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('{id}', [DeviceController::class, 'device_by_id']);
         Route::patch('update/{id}', [DeviceController::class, 'update']);
         Route::delete('destroy/{id}', [DeviceController::class, 'destroy']);
+        Route::get('list/{cate}', [DeviceController::class, 'list_by_cate']);
     });
 });
 
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'register']);
+Route::get('setting/data', [SettingController::class, 'get_sensor']);

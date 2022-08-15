@@ -19,6 +19,7 @@ class CreateDevicesTable extends Migration
             $table->string('device_id');
             $table->smallInteger('widget_id');
             $table->string('type')->nullable();
+            $table->string('type_cam')->nullable();
             $table->string('name')->nullable();
             $table->string('location_name')->nullable();
             $table->timestamps();

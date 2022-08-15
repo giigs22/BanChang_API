@@ -16,6 +16,7 @@ class DeviceController extends Controller
         $location = $request->location;
         $name = $request->name;
         $type = $request->type;
+        $type_cam = $request->type_cam;
 
         try {
             $add = new Device();
@@ -25,6 +26,7 @@ class DeviceController extends Controller
             $add->location_name = $location;
             $add->name = $name;
             $add->type = $type;
+            $add->type_cam = $type_cam;
             $add->save();
             if ($add) {
                 return response()->json(['success' => true, 'message' => 'Data has been Save Successfully']);
@@ -67,6 +69,7 @@ class DeviceController extends Controller
         $location = $request->location;
         $name = $request->name;
         $type = $request->type;
+        $type_cam = $request->type_cam;
 
         try {
             $update = Device::find($id);
@@ -76,6 +79,7 @@ class DeviceController extends Controller
             $update->location_name = $location;
             $update->name = $name;
             $update->type = $type;
+            $update->type_cam = $type_cam;
             $update->save();
             if ($update) {
                 return response()->json(['success' => true, 'message' => 'Update Successfully']);
@@ -96,5 +100,9 @@ class DeviceController extends Controller
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+    public function list_by_cate(Request $request, $cate_id)
+    {
+        return Device::where('widget_id', $cate_id)->get();
     }
 }
