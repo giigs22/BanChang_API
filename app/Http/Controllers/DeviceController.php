@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Backup;
 use App\Models\Device;
 use Exception;
 use Illuminate\Http\Request;
@@ -104,5 +105,19 @@ class DeviceController extends Controller
     public function list_by_cate(Request $request, $cate_id)
     {
         return Device::where('widget_id', $cate_id)->get();
+    }
+    public function backup_data_sensor(Request $request)
+    {
+        try {
+            $add = new Backup();
+            $add->device_id = $request->device;
+            $add->data_value = json_encode($request->data);
+            $add->save();
+            if($add){
+                return response()->json(['success' => true, 'message' => '']);
+            }
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }
