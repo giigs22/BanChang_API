@@ -17,6 +17,7 @@ class CreateBackupsTable extends Migration
             $table->id();
             $table->integer('device_id');
             $table->text('data_value');
+            $table->string('type');
             $table->timestamps();
         });
     }

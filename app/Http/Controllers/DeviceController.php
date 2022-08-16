@@ -108,17 +108,30 @@ class DeviceController extends Controller
     }
     public function backup_data_sensor(Request $request)
     {
+        $device_id = $request->device;
+        
         try {
-            $add = new Backup();
-            $add->device_id = $request->device;
-            $add->data_value = json_encode($request->data);
-            $add->type = $request->type;
-            $add->save();
-            if ($add) {
+            $chk = Backup::where('device_id',$device_id)->first();
+            if(!empty($chk)){
+                $update = $chk;
+                $update->data_value = json_encode($request->data);
+                $update->save();
+            }else{
+                $add = new Backup();
+                $add->device_id = $device_id;
+                $add->data_value = json_encode($request->data);
+                $add->save();
+            }
+            if($add || $update){
                 return response()->json(['success' => true, 'message' => '']);
             }
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+    public function get_data_backup(Request $request,$id)
+    {
+        $db_backup = Backup::where('device_id',$id)->first();
+        return response()->json($db_backup);
     }
 }

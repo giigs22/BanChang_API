@@ -68,6 +68,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::delete('destroy/{id}', [DeviceController::class, 'destroy']);
         Route::get('list/{cate}', [DeviceController::class, 'list_by_cate']);
         Route::post('backup',[DeviceController::class,'backup_data_sensor']);
+        Route::get('backup/get/{id}',[DeviceController::class,'get_data_backup']);
     });
 });
 
