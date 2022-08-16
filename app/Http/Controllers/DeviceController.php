@@ -112,8 +112,9 @@ class DeviceController extends Controller
             $add = new Backup();
             $add->device_id = $request->device;
             $add->data_value = json_encode($request->data);
+            $add->type = $request->type;
             $add->save();
-            if($add){
+            if ($add) {
                 return response()->json(['success' => true, 'message' => '']);
             }
         } catch (Exception $e) {
