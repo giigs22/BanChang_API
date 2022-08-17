@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ImageProfile;
 use App\Models\Role;
+use App\Models\Template;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -257,7 +258,10 @@ class UserController extends Controller
             $img_url = null;
         }
         $data['img_profile'] = $img_url;
-        return $data;
+        $widget = User::with('templates.widgets')->find($user->id);
+        $data['widgets'] = $widget->templates[0]->widgets;
+        return response()->json($data);
+          
     }
     public function setTemplate($user_id, $role_id)
     {
