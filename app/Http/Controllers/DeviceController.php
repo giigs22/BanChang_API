@@ -58,6 +58,10 @@ class DeviceController extends Controller
         return response()->json($data_);
 
     }
+    public function list_device_all()
+    {
+        return Device::all();
+    }
     public function device_by_id(Request $request, $id)
     {
         return Device::find($id);

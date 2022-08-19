@@ -63,6 +63,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'device'], function () {
         Route::post('store', [DeviceController::class, 'store']);
         Route::post('list', [DeviceController::class, 'list_device']);
+        Route::get('all', [DeviceController::class, 'list_device_all']);
         Route::get('{id}', [DeviceController::class, 'device_by_id']);
         Route::patch('update/{id}', [DeviceController::class, 'update']);
         Route::delete('destroy/{id}', [DeviceController::class, 'destroy']);
