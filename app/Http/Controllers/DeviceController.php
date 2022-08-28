@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Backup;
 use App\Models\Device;
+use App\Models\Location;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DeviceController extends Controller
 {
@@ -112,23 +114,28 @@ class DeviceController extends Controller
     }
     public function backup_data_sensor(Request $request)
     {
-        $device_id = $request->device;
-        
+        $arr_data = $request->data;
+
+        DB::beginTransaction();
         try {
-            $chk = Backup::where('device_id',$device_id)->first();
+            foreach ($arr_data as $key => $value) {
+            $chk = Backup::where('device_id',$value['device'])->first();
             if(!empty($chk)){
                 $update = $chk;
-                $update->data_value = json_encode($request->data);
+                $update->data_value = json_encode($value['data']);
+                $update->type = $value['type'];
                 $update->save();
             }else{
                 $add = new Backup();
-                $add->device_id = $device_id;
-                $add->data_value = json_encode($request->data);
+                $add->device_id = $value['device'];
+                $add->data_value = json_encode($value['data']);
+                $add->type = $value['type'];
                 $add->save();
             }
-            if($add || $update){
-                return response()->json(['success' => true, 'message' => '']);
             }
+            DB::commit();
+            return response()->json(['success' => true, 'message' => '']);
+            
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
@@ -137,5 +144,31 @@ class DeviceController extends Controller
     {
         $db_backup = Backup::where('device_id',$id)->first();
         return response()->json($db_backup);
+    }
+    public function backup_data_location(Request $request)
+    {
+        $arr_data = $request->data;
+        DB::beginTransaction();
+        try {
+            foreach ($arr_data as $key => $value) {
+                $chk = Location::where('device_id',$value['device'])->first();
+                if(!empty($chk)){
+                    $update = $chk;
+                    $update->data_value = json_encode($value['data']);
+                    $update->save();
+                }else{
+                    $add = new Location();
+                    $add->device_id = $value['device'];
+                    $add->data_value = json_encode($value['data']);
+                    $add->save();
+                }
+            }
+            
+            DB::commit();
+            return response()->json(['success' => true, 'message' => '']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }
