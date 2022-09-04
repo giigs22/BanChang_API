@@ -71,6 +71,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('backup',[DeviceController::class,'backup_data_sensor']);
         Route::post('backup/location',[DeviceController::class,'backup_data_location']);
         Route::get('backup/get/{id}',[DeviceController::class,'get_data_backup']);
+        Route::post('map_data',[DeviceController::class,'map_data']);
     });
 });
 

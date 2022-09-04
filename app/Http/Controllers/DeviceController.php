@@ -171,4 +171,19 @@ class DeviceController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+    public function map_data(Request $request)
+    {
+        $layer = $request->data;
+        $mapdata = [];
+        foreach ($layer as $key => $value) {
+            if($value == 'aqi'){
+                $device = Device::with(['backup','location'])->where('widget_id',1)->get();
+                foreach ($device as $key2 => $value2) {
+                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $mapdata[]= $data;
+                }
+            }
+        }
+        return response()->json($mapdata);
+    }
 }
