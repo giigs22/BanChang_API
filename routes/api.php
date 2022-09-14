@@ -79,4 +79,4 @@ Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'register']);
 Route::get('setting/data', [SettingController::class, 'get_sensor']);
 Route::post('forgotpass',[UserController::class,'forgot']);
-Route::post('password/reset', 'Auth\ResetPasswordController@postReset')->name('password.reset');
+Route::post('changepass',[UserController::class,'changepass']);

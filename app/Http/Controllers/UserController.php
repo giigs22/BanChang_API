@@ -6,15 +6,17 @@ use App\Models\ImageProfile;
 use App\Models\Role;
 use App\Models\Template;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Str;
 class UserController extends Controller
 {
     public function register(Request $request)
@@ -278,12 +280,101 @@ class UserController extends Controller
             return false;
         }
     }
-    public function forgot()
+    public function forgot(Request $request)
     {
-        $credentials = request()->validate(['email' => 'required|email']);
+         $email = $request->email;
+         $token = Str::random(64);
+         $url_frontend = env('FRONTEND_URL');
+        
+        $check_mail_user = $this->checkMailUser($email);
+        if($check_mail_user){
+            $check_reset_mail = $this->checkResetMail($email);
 
-        Password::sendResetLink($credentials);
+            if(!$check_reset_mail){
+                DB::table('password_resets')->insert([
+                    'email' => $request->email, 
+                    'token' => $token, 
+                    'created_at' => Carbon::now()
+                ]);
+            }else{
+                DB::table('password_resets')
+                ->where('email',$email)
+                ->update(['token'=>$token,'created_at'=>Carbon::now()]);
+            }
+            //return view('email.forgetPassword',compact('url_frontend','token'));
 
-        return response()->json(["msg" => 'Reset password link sent on your email id.']);
+            Mail::send('email.forgetPassword', ['url_frontend'=>$url_frontend,'token' => $token], function($message) use($request){
+                $message->to($request->email);
+                $message->subject('Reset Password');
+            });
+
+            if(count(Mail::failures()) > 0){
+                return response()->json(['success'=>false,'message'=>'Email not Send!.Please try again']);
+            }else{
+                return response()->json(['success'=>true,'message'=>'An email has been sent. Please check your inbox.']);
+            }
+        }else{
+            return response()->json(['success'=>false,'message'=>'Your Email has not found.']);
+        }
+
+    }
+    public function checkResetMail($email)
+    {
+        $check = DB::table('password_resets')->where('email',$email)->first();
+        return (!empty($check))?true:false;
+    }
+    public function checkMailUser($email)
+    {
+        $check = User::where('email',$email)->first();
+        if(!empty($check)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public function changepass(Request $request)
+    {
+        $pass = $request->password;
+        $token  = $request->token;
+        $url_frontend = env('FRONTEND_URL');
+
+        $check_expire = $this->checkExpireToken($token);
+        if($check_expire){
+            return response()->json(['success'=>false,'message'=>'Token has Expire.Please send forgot password again']);
+        }else{
+            $data = DB::table('password_resets')->where('token',$token)->first();
+
+            $user = User::where('email',$data->email)->first();
+            $user->update(['password'=>Hash::make($pass)]);
+
+            DB::table('password_resets')->where('token',$token)->delete();
+
+
+            Mail::send('email.changePassword', ['url_frontend'=>$url_frontend], function($message) use($user){
+                $message->to($user->email);
+                $message->subject('Change Password Successfully');
+            });
+
+            if(count(Mail::failures()) > 0){
+                return response()->json(['success'=>false,'message'=>'Email not Send!.Please try again']);
+            }else{
+                return response()->json(['success'=>true,'message'=>'An email has been sent. Please check your inbox.']);
+            }
+
+        }
+    }
+    public function checkExpireToken($token)
+    {
+        $data = DB::table('password_resets')->where('token',$token)->first();
+        if(!empty($data)){
+            if($data->created_at > now()->addHour() ){
+                $data->delete();
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            return true;
+        }
     }
 }
