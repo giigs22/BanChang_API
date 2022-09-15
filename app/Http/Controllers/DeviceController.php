@@ -179,7 +179,55 @@ class DeviceController extends Controller
             if($value == 'aqi'){
                 $device = Device::with(['backup','location'])->where('widget_id',1)->get();
                 foreach ($device as $key2 => $value2) {
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
+                    $data['location'] = $value2['location']->data_value;
+                    $mapdata[]= $data;
+                }
+            }
+            if($value == 'smlight'){
+                $device = Device::with(['backup','location'])->where('widget_id',2)->get();
+                foreach ($device as $key2 => $value2) {
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
+                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
+                    $data['location'] = $value2['location']->data_value;
+                    $mapdata[]= $data;
+                }
+            }
+            if($value == 'smpole'){
+                $device = Device::with(['backup','location'])->where('widget_id',3)->get();
+                foreach ($device as $key2 => $value2) {
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
+                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
+                    $data['location'] = $value2['location']->data_value;
+                    $mapdata[]= $data;
+                }
+            }
+            if($value == 'cctv'){
+                $device = Device::with(['backup','location'])->where('widget_id',4)->get();
+                foreach ($device as $key2 => $value2) {
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
+                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
+                    $data['location'] = $value2['location']->data_value;
+                    $mapdata[]= $data;
+                }
+            }
+            if($value == 'wifi'){
+                $device = Device::with(['backup','location'])->where('widget_id',9)->get();
+                foreach ($device as $key2 => $value2) {
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
+                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
+                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
+                    $data['location'] = $value2['location']->data_value;
                     $mapdata[]= $data;
                 }
             }
