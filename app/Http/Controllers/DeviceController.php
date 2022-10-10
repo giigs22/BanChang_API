@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\ApiHelper;
+use App\Classes\Helpers;
 use App\Models\Backup;
 use App\Models\Device;
 use App\Models\Location;
@@ -11,6 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class DeviceController extends Controller
 {
+    public function __construct()
+    {
+        $this->api_helper = new ApiHelper;
+        $this->helpers = new Helpers;
+    }
     public function store(Request $request)
     {
         $cate = $request->cate;
@@ -119,30 +126,30 @@ class DeviceController extends Controller
         DB::beginTransaction();
         try {
             foreach ($arr_data as $key => $value) {
-            $chk = Backup::where('device_id',$value['device'])->first();
-            if(!empty($chk)){
-                $update = $chk;
-                $update->data_value = json_encode($value['data']);
-                $update->type = $value['type'];
-                $update->save();
-            }else{
-                $add = new Backup();
-                $add->device_id = $value['device'];
-                $add->data_value = json_encode($value['data']);
-                $add->type = $value['type'];
-                $add->save();
-            }
+                $chk = Backup::where('device_id', $value['device'])->first();
+                if (!empty($chk)) {
+                    $update = $chk;
+                    $update->data_value = json_encode($value['data']);
+                    $update->type = $value['type'];
+                    $update->save();
+                } else {
+                    $add = new Backup();
+                    $add->device_id = $value['device'];
+                    $add->data_value = json_encode($value['data']);
+                    $add->type = $value['type'];
+                    $add->save();
+                }
             }
             DB::commit();
             return response()->json(['success' => true, 'message' => '']);
-            
+
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
-    public function get_data_backup(Request $request,$id)
+    public function get_data_backup(Request $request, $id)
     {
-        $db_backup = Backup::where('device_id',$id)->first();
+        $db_backup = Backup::where('device_id', $id)->first();
         return response()->json($db_backup);
     }
     public function backup_data_location(Request $request)
@@ -151,19 +158,19 @@ class DeviceController extends Controller
         DB::beginTransaction();
         try {
             foreach ($arr_data as $key => $value) {
-                $chk = Location::where('device_id',$value['device'])->first();
-                if(!empty($chk)){
+                $chk = Location::where('device_id', $value['device'])->first();
+                if (!empty($chk)) {
                     $update = $chk;
                     $update->data_value = json_encode($value['data']);
                     $update->save();
-                }else{
+                } else {
                     $add = new Location();
                     $add->device_id = $value['device'];
                     $add->data_value = json_encode($value['data']);
                     $add->save();
                 }
             }
-            
+
             DB::commit();
             return response()->json(['success' => true, 'message' => '']);
         } catch (Exception $e) {
@@ -176,62 +183,120 @@ class DeviceController extends Controller
         $layer = $request->data;
         $mapdata = [];
         foreach ($layer as $key => $value) {
-            if($value == 'aqi'){
-                $device = Device::with(['backup','location'])->where('widget_id',1)->get();
+            if ($value == 'aqi') {
+                $device = Device::where('widget_id', 1)->get();
                 foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
-                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
-                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
-                    $data['location'] = $value2['location']->data_value;
-                    $mapdata[]= $data;
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $mapdata[] = $data;
                 }
             }
-            if($value == 'smlight'){
-                $device = Device::with(['backup','location'])->where('widget_id',2)->get();
+            if ($value == 'smlight') {
+                $device = Device::where('widget_id', 2)->get();
                 foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
-                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
-                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
-                    $data['location'] = $value2['location']->data_value;
-                    $mapdata[]= $data;
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $mapdata[] = $data;
                 }
             }
-            if($value == 'smpole'){
-                $device = Device::with(['backup','location'])->where('widget_id',3)->get();
+            if ($value == 'smpole') {
+                $device = Device::where('widget_id', 3)->get();
                 foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
-                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
-                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
-                    $data['location'] = $value2['location']->data_value;
-                    $mapdata[]= $data;
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $mapdata[] = $data;
                 }
             }
-            if($value == 'cctv'){
-                $device = Device::with(['backup','location'])->where('widget_id',4)->get();
+            if ($value == 'cctv') {
+                $device = Device::where('widget_id', 4)->get();
                 foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
-                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
-                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
-                    $data['location'] = $value2['location']->data_value;
-                    $mapdata[]= $data;
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $mapdata[] = $data;
                 }
             }
-            if($value == 'wifi'){
-                $device = Device::with(['backup','location'])->where('widget_id',9)->get();
+            if ($value == 'wifi') {
+                $device = Device::where('widget_id', 9)->get();
                 foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
-                    $data['name'] = !empty($value2['location_name'])?$value2['location_name']:$value2['device_name'];
-                    $data['data'] = (!empty($value2['backup']))?$value2['backup']->data_value:null;
-                    $data['location'] = $value2['location']->data_value;
-                    $mapdata[]= $data;
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $mapdata[] = $data;
                 }
             }
         }
         return response()->json($mapdata);
+    }
+    public function map_data_device(Request $request, $id)
+    {
+        $device = Device::with(['backup', 'location'])->find($id);
+        $data['widget'] = $this->widgetKey($device->widget_id);
+        $data['device_id'] = $device->id;
+        $data['name'] = !empty($device->location_name) ? $device->location_name : $device->device_name;
+        $data['data'] = (!empty($device->backup)) ? $device->backup['data_value'] : null;
+        $data['location'] = $device->location['data_value'];
+
+        return response()->json($data);
+    }
+    public function widgetKey($id)
+    {
+        if ($id == '1') {
+            $key = 'aqi';
+        } elseif ($id == '2') {
+            $key = 'smlight';
+        } elseif ($id == '3') {
+            $key = 'smpole';
+        } elseif ($id == '4') {
+            $key = 'cctv';
+        } elseif ($id == '9') {
+            $key = 'wifi';
+        }
+        return $key;
+    }
+    public function device_offline()
+    {
+        $mapdata = [];
+        $device = Device::all();
+        foreach ($device as $key => $value) {
+            $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
+            $get_data = $this->api_helper->getLastDataAPIByDevice($value->device_id);
+            $get_location = $this->helpers->getLocation($get_attr);
+            $data['widget'] = '';
+            $data['device_id'] = $value['id'];
+            $data['name'] = !empty($value['location_name']) ? $value['location_name'] : $value['device_name'];
+            $data['data'] = $get_data;
+            $data['location'] = $get_location;
+            $mapdata[] = $data;
+        }
+        return $mapdata;
     }
 }

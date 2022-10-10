@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\RoleController;
@@ -19,7 +20,12 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
  */
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('get_data/{type}/{sensor}/{option?}', [DataController::class, 'get_data']);
+    Route::get('get_status/{sensor}', [DataController::class, 'get_status']);
+    Route::get('status/all', [DataController::class, 'device_all']);
+
     Route::post('logger', [LogController::class, 'save_log']);
     Route::post('setting/update', [SettingController::class, 'update']);
     Route::get('setting/list', [SettingController::class, 'getlist']);
@@ -68,15 +74,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::patch('update/{id}', [DeviceController::class, 'update']);
         Route::delete('destroy/{id}', [DeviceController::class, 'destroy']);
         Route::get('list/{cate}', [DeviceController::class, 'list_by_cate']);
-        Route::post('backup',[DeviceController::class,'backup_data_sensor']);
-        Route::post('backup/location',[DeviceController::class,'backup_data_location']);
-        Route::get('backup/get/{id}',[DeviceController::class,'get_data_backup']);
-        Route::post('map_data',[DeviceController::class,'map_data']);
+        Route::post('backup', [DeviceController::class, 'backup_data_sensor']);
+        Route::post('backup/location', [DeviceController::class, 'backup_data_location']);
+        Route::get('backup/get/{id}', [DeviceController::class, 'get_data_backup']);
+        Route::post('map_data', [DeviceController::class, 'map_data']);
+        Route::get('map_data/{id}', [DeviceController::class, 'map_data_device']);
+        Route::get('offline', [DeviceController::class, 'device_offline']);
     });
 });
 
 Route::post('login', [UserController::class, 'login']);
 Route::post('register', [UserController::class, 'register']);
 Route::get('setting/data', [SettingController::class, 'get_sensor']);
-Route::post('forgotpass',[UserController::class,'forgot']);
-Route::post('changepass',[UserController::class,'changepass']);
+Route::post('forgotpass', [UserController::class, 'forgot']);
+Route::post('changepass', [UserController::class, 'changepass']);

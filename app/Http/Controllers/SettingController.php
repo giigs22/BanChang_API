@@ -42,8 +42,8 @@ class SettingController extends Controller
     }
     public function get_sensor()
     {
-        $list_field = ['sensor_api', 'sensor_api_pass', 'sensor_api_token', 'sensor_api_user'];
-        for ($i = 0; $i < 4; $i++) {
+        $list_field = ['data_api'];
+        for ($i = 0; $i < count($list_field); $i++) {
             $data[] = DB::table('setting')->where('name', $list_field[$i])->first();
         }
         $list_data = [];
