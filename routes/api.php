@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\DeviceController;
@@ -69,6 +70,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'device'], function () {
         Route::post('store', [DeviceController::class, 'store']);
         Route::post('list', [DeviceController::class, 'list_device']);
+        Route::get('list/ma', [DeviceController::class, 'device_ma']);
         Route::get('all', [DeviceController::class, 'list_device_all']);
         Route::get('{id}', [DeviceController::class, 'device_by_id']);
         Route::patch('update/{id}', [DeviceController::class, 'update']);
@@ -79,7 +81,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('backup/get/{id}', [DeviceController::class, 'get_data_backup']);
         Route::post('map_data', [DeviceController::class, 'map_data']);
         Route::get('map_data/{id}', [DeviceController::class, 'map_data_device']);
-        Route::get('offline', [DeviceController::class, 'device_offline']);
+    });
+
+    Route::group(['prefix' => 'complaint'], function () {
+        Route::post('list', [ComplaintController::class, 'list_complanit']);
+        Route::delete('destroy/{id}',[ComplaintController::class,'destroy']);
+
     });
 });
 
