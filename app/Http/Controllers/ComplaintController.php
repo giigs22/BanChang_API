@@ -4,11 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Complaint;
 use App\Models\Device;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Faker\Factory as Faker;
 
 class ComplaintController extends Controller
 {
+    public function store(Request $request)
+    {
+        $fake = Faker::create();
+
+        $add = new Complaint();
+        $add->title = $fake->sentence(10);
+        $add->detail = $fake->sentence(20);
+        $add->name_complaint = $fake->name();
+        $add->location = 'Banchang';
+        $add->date_complaint = $fake->dateTimeBetween('now','+2 month');
+        $add->respon_agen = $fake->name().' Unit';
+        $add->img_cover = 'img_ex_complaint.png';
+        $add->type = $fake->randomElement(['disturbance','electricity','water','etc','disturbance']);
+        $add->status = 'pending';
+        $add->save();
+
+    }
     public function list_complanit(Request $request)
     {
         $itemPerpage = $request->itemperpage;
@@ -16,6 +35,7 @@ class ComplaintController extends Controller
         $filter = $request->filter;
 
         $comp = Complaint::orderBy('id', 'ASC');
+        $stat = collect($comp->get())->countBy('type');
         $count_all = $comp->count();
         if (!empty($start) || !empty($itemPerpage)) {
             $comp = $comp->offset($start);
@@ -43,19 +63,16 @@ class ComplaintController extends Controller
         $data_ = [];
         $data_['list_comp'] = $list_comp;
         $data_['count_all'] = $count_all;
+        $data_['stat'] = $stat;
 
         return response()->json($data_);
     }
+    public function complaint_by_id(Request $request,$id)
+    {
+        return Complaint::find($id);
+    }
     public function destroy(Request $request)
     {
-        echo 'del';
-        // try {
-        //     $del = Complaint::find($request->id);
-        //     Storage::disk('public_upload')->delete('complaint/' . $del->img_cover, File::delete($del->img_cover));
-        //     $del->delete();
-        //     return response()->json(['success' => false, 'message' => 'Data has been Delete Successfully.']);
-        // } catch (Exception $e) {
-        //     return response()->json(['success' => false, 'message' => $e->getMessage()]);
-        // }
+        
     }
 }
