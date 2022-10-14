@@ -27,9 +27,9 @@ class DataController extends Controller
                 }
             } elseif ($sensor == 'smart_pole') {
                 $smpCon = new SmartPoleController;
-                if($option == 'view'){
+                if ($option == 'view') {
                     $data = $smpCon->responseDataView();
-                }else{
+                } else {
                     $data = $smpCon->responseData();
                 }
             } elseif ($sensor == 'wifi') {
@@ -41,10 +41,15 @@ class DataController extends Controller
                     $setdata = $cctvCon->responseData('attr');
                     $data = $cctvCon->groupSur($setdata);
                 }
-            }elseif($sensor == 'smart_light'){
+            } elseif ($sensor == 'smart_light') {
                 $smCon = new SmartLightController;
                 if ($option == 'view') {
                     $data = $smCon->responseDataView();
+                }
+            } elseif ($sensor == 'cctv') {
+                $cctvCon = new CCTVController;
+                if ($option == 'view') {
+                    $data = $cctvCon->responseDataView();
                 }
             }
         }

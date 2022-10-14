@@ -19,7 +19,7 @@ class CreateComplaintsTable extends Migration
             $table->text('detail');
             $table->string('name_complaint');
             $table->string('location');
-            $table->dateTime('date_complaint');
+            $table->date('date_complaint');
             $table->string('respon_agen');
             $table->string('img_cover');
             $table->string('type');
