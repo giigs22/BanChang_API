@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Classes\ApiHelper;
 use App\Classes\Helpers;
 use App\Http\Controllers\ResponseData\CCTVController;
+use App\Http\Controllers\ResponseData\DigitalSignageController;
 use App\Http\Controllers\ResponseData\EnvController;
 use App\Http\Controllers\ResponseData\SmartLightController;
 use App\Http\Controllers\ResponseData\SmartPoleController;
+use App\Http\Controllers\ResponseData\SOSController;
 use App\Http\Controllers\ResponseData\WifiController;
 use App\Models\Device;
 use Illuminate\Http\Request;
@@ -34,7 +36,11 @@ class DataController extends Controller
                 }
             } elseif ($sensor == 'wifi') {
                 $wfCon = new WifiController;
-                $data = $wfCon->responseData();
+                if($option == 'view'){
+                    $data = $wfCon->responseDataView();
+                }else{
+                    $data = $wfCon->responseData();
+                }
             } elseif ($sensor == 'cctv_sur') {
                 $cctvCon = new CCTVController;
                 if ($option == 'chartdata') {
@@ -50,6 +56,16 @@ class DataController extends Controller
                 $cctvCon = new CCTVController;
                 if ($option == 'view') {
                     $data = $cctvCon->responseDataView();
+                }
+            }elseif($sensor == 'digi_sig'){
+                $digi = new DigitalSignageController;
+                if($option == 'view'){
+                    $data = $digi->responseDataView();
+                }
+            }elseif($sensor == 'sos'){
+                $sos = new SOSController;
+                if($option == 'view'){
+                    $data = $sos->responseDataView();
                 }
             }
         }

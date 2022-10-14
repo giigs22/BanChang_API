@@ -34,21 +34,33 @@ class ComplaintController extends Controller
 
         $comp = Complaint::orderBy('id', (empty($search['order_by'])) ? 'ASC' : $search['order_by']);
         $stat = collect($comp->get())->countBy('type');
+        $count_all = $comp->count();
 
         if (!empty($search['title'])) {
             $comp = $comp->where('title', 'like', '%' . $search['title'] . '%');
+            $count_all = $comp->count();
+
         }
         if (!empty($search['agency'])) {
             $comp = $comp->where('respon_agen', 'like', '%' . $search['agency'] . '%');
+            $count_all = $comp->count();
+
         }
         if (!empty($search['start_date']) && !empty($search['end_date'])) {
             $comp = $comp->whereBetween('date_complaint', [$search['start_date'], $search['end_date']]);
+            $count_all = $comp->count();
+
         } else {
             if (!empty($search['start_date']) && empty($search['end_date'])) {
 
                 $comp = $comp->where('date_complaint', $search['start_date']);
-            } else {
+                $count_all = $comp->count();
+
+            }
+            if (empty($search['start_date']) && !empty($search['end_date'])){
                 $comp = $comp->where('date_complaint', $search['end_date']);
+                $count_all = $comp->count();
+
             }
         }
 
@@ -58,8 +70,7 @@ class ComplaintController extends Controller
         } else {
             $comp = $comp->get();
         }
-        $count_all = $comp->count();
-
+        
         $list_comp = [];
         foreach ($comp as $key => $value) {
             $data['id'] = $value->id;
