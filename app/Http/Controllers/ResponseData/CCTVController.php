@@ -42,11 +42,15 @@ class CCTVController extends Controller
             $get_data = $this->api_helper->getLastDataAPIByDevice($value->device_id);
             $get_location = $this->helpers->getLocation($get_attr);
             $get_status = $this->helpers->getStatus($get_attr);
+            $url_rtsp = $this->getRTSP($get_attr);
+
+           
 
             $setdata['id'] = $value->id;
             $setdata['widget'] = 'cctv';
             $setdata['name'] = $value->location_name !== null ? $value->location_name : $value->device_name;
             $setdata['data'] = $get_data;
+            $setdata['rtsp']  = $url_rtsp;
             $setdata['location'] = $get_location;
             $setdata['status'] = $get_status;
             $data[] = $setdata;
@@ -72,6 +76,14 @@ class CCTVController extends Controller
             }
         }
         return $group_data;
+    }
+    public function getRTSP($data)
+    {
+        foreach ($data as $key => $value) {
+            if($value->key == 'rtsp'){
+                return $value->value;
+            }            
+        }
     }
 
 }

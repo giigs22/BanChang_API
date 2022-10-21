@@ -11,16 +11,14 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         $sensor_api = $request->sensor_api;
-        $sensor_api_pass = $request->sensor_api_pass;
-        $sensor_api_token = $request->sensor_api_token;
-        $sensor_api_user = $request->sensor_api_user;
+
 
         try {
-            $list_value = [$sensor_api, $sensor_api_pass, $sensor_api_token, $sensor_api_user];
-            $list_field = ['sensor_api', 'sensor_api_pass', 'sensor_api_token', 'sensor_api_user'];
-            for ($i = 0; $i < 4; $i++) {
-                DB::table('setting')->where('name', $list_field[$i])->update(['value' => $list_value[$i]]);
-            }
+            //$list_value = [$sensor_api];
+            //$list_field = ['data_api'];
+            //for ($i = 0; $i < 4; $i++) {
+                DB::table('setting')->where('name', 'data_api')->update(['value' => $sensor_api]);
+            //}
 
             return response()->json(['success' => true, 'message' => 'Update Successfully']);
 
