@@ -13,12 +13,4 @@ class Device extends Model
     {
         return $this->hasOne(Widget::class, 'id', 'widget_id');
     }
-    public function backup()
-    {
-        return $this->hasOne(Backup::class,'device_id','id');
-    }
-    public function location()
-    {
-        return $this->hasOne(Location::class,'device_id','id');
-    }
 }

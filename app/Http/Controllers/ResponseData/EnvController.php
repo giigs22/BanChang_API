@@ -26,7 +26,19 @@ class EnvController extends Controller
         $get_data_lnr = $this->api_helper->getLastDataAPI($lnr);
         $get_data_env = $this->api_helper->getLastDataAPI($env);
 
-        return ['lnr' => $get_data_lnr, 'env' => $get_data_env];
+        $list_lnr = [];
+        $list_env = [];
+        foreach ($get_data_lnr as $key => $value) {
+            if(!empty($value)){
+                $list_lnr[] = $value;
+            }
+        }
+        foreach ($get_data_env as $key => $value) {
+            if(!empty($value)){
+                $list_env[] = $value;
+            }
+        }
+        return ['lnr' => $list_lnr, 'env' => $list_env];
 
     }
     public function responseDataView()

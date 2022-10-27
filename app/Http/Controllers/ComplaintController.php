@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
-use Faker\Factory as Faker;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,20 +11,29 @@ class ComplaintController extends Controller
 {
     public function store(Request $request)
     {
-        $fake = Faker::create();
-        $user = $request->user();
-        $add = new Complaint();
-        $add->title = $fake->sentence(10);
-        $add->detail = $fake->sentence(20);
-        $add->name_complaint = $user->name;
-        $add->location = 'Banchang';
-        $add->date_complaint = $fake->dateTimeBetween('now', '+2 month');
-        $add->respon_agen = $fake->word(1) . ' Unit';
-        $add->img_cover = 'img_ex_complaint.png';
-        $add->type = $fake->randomElement(['disturbance', 'electricity', 'water', 'etc', 'disturbance']);
-        $add->status = 'pending';
-        $add->save();
+        try {
+            $user = $request->user();
+            $add = new Complaint();
 
+            $add->title = $request->title;
+            $add->detail = $request->detail;
+            $add->name_complaint = $user->name;
+            $add->location = $request->location;
+            $add->date_complaint = now();
+            $add->respon_agen = $request->respon_agen;
+            $add->img_cover = (!empty($request->img_cover))?$request->img_cover:'img_ex_complaint.png';
+            $add->type = $request->type;
+            $add->status = $request->status;
+            $add->save();
+            
+            if($add){
+                return response()->json(['success' => true, 'message' => 'Data has been Save Successfully.']);
+            }
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+ 
+        }
+       
     }
     public function list_complanit(Request $request)
     {

@@ -29,8 +29,12 @@ class UserController extends Controller
         $location = $request->location;
         $email = $request->email;
         $phone = $request->phone;
-        $role = (isset($request->role)) ? $request->role : 3;
+        
+        $role_user = Role::where('name','User')->first();
+
+        $role = (isset($request->role)) ? $request->role : $role_user->id;
         $status = (isset($request->status)) ? $request->status : '1';
+
         $profile = $request->profile;
 
         $check_mail = $this->uniqEmail($email);
@@ -196,8 +200,8 @@ class UserController extends Controller
         $location = $request->location;
         $email = $request->email;
         $phone = $request->phone;
-        $role = (isset($request->role)) ? $request->role : 3;
-        $status = (isset($request->status)) ? $request->status : '1';
+        $role = $request->role;
+        $status = $request->status;
         $profile = $request->profile;
 
         DB::beginTransaction();
@@ -240,7 +244,9 @@ class UserController extends Controller
     {
         $del = User::find($id);
         $img = ImageProfile::where('user_id', $id)->first();
+        if(!empty($img)){
         Storage::disk('public_upload')->delete($img->filename, File::delete($img->filename));
+        }
 
         $del->delete();
         if ($del) {
@@ -253,7 +259,7 @@ class UserController extends Controller
         $user = $request->user();
         $data['data']['id'] = $user->id;
         $data['data']['name'] = $user->name;
-        $data['data']['user_group'] = $user->roles[0]->name;
+        $data['data']['user_group'] = $user->roles[0]->slug;
         $img_profile = ImageProfile::where('user_id', $user->id)->first();
         if (!empty($img_profile)) {
             $img_url = Storage::disk('public_upload')->url($img_profile->filename);

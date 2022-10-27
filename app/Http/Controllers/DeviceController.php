@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Classes\ApiHelper;
 use App\Classes\Helpers;
-use App\Models\Backup;
 use App\Models\Device;
-use App\Models\Location;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -118,65 +116,6 @@ class DeviceController extends Controller
     public function list_by_cate(Request $request, $cate_id)
     {
         return Device::where('widget_id', $cate_id)->get();
-    }
-    public function backup_data_sensor(Request $request)
-    {
-        $arr_data = $request->data;
-
-        DB::beginTransaction();
-        try {
-            foreach ($arr_data as $key => $value) {
-                $chk = Backup::where('device_id', $value['device'])->first();
-                if (!empty($chk)) {
-                    $update = $chk;
-                    $update->data_value = json_encode($value['data']);
-                    $update->type = $value['type'];
-                    $update->save();
-                } else {
-                    $add = new Backup();
-                    $add->device_id = $value['device'];
-                    $add->data_value = json_encode($value['data']);
-                    $add->type = $value['type'];
-                    $add->save();
-                }
-            }
-            DB::commit();
-            return response()->json(['success' => true, 'message' => '']);
-
-        } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
-        }
-    }
-    public function get_data_backup(Request $request, $id)
-    {
-        $db_backup = Backup::where('device_id', $id)->first();
-        return response()->json($db_backup);
-    }
-    public function backup_data_location(Request $request)
-    {
-        $arr_data = $request->data;
-        DB::beginTransaction();
-        try {
-            foreach ($arr_data as $key => $value) {
-                $chk = Location::where('device_id', $value['device'])->first();
-                if (!empty($chk)) {
-                    $update = $chk;
-                    $update->data_value = json_encode($value['data']);
-                    $update->save();
-                } else {
-                    $add = new Location();
-                    $add->device_id = $value['device'];
-                    $add->data_value = json_encode($value['data']);
-                    $add->save();
-                }
-            }
-
-            DB::commit();
-            return response()->json(['success' => true, 'message' => '']);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
-        }
     }
     public function map_data(Request $request)
     {

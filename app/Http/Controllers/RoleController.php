@@ -45,6 +45,7 @@ class RoleController extends Controller
         try {
             $add = new Role();
             $add->name = $request->name;
+            $add->slug = strtolower($request->name);
             $add->save();
             return response()->json(['success'=>true,'message'=>'Data has been Save Successfully']);
 
@@ -64,6 +65,7 @@ class RoleController extends Controller
         try {
             $update = Role::find($id);
             $update->name =$name;
+            $update->slug = strtolower($name);
             $update->save();
 
             if($update){
