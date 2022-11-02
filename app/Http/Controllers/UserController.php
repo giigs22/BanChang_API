@@ -21,6 +21,7 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
+
         $idcard = $request->idcard;
         $name = $request->name;
         $username = $request->username;
@@ -30,12 +31,17 @@ class UserController extends Controller
         $email = $request->email;
         $phone = $request->phone;
         
+        //Default Role User for Register
         $role_user = Role::where('name','User')->first();
-
         $role = (isset($request->role)) ? $request->role : $role_user->id;
+
         $status = (isset($request->status)) ? $request->status : '1';
 
         $profile = $request->profile;
+
+        if(empty($username) || empty($password) || empty($email) || empty($phone)){
+            return response()->json(['success' => false, 'message' => 'Field Username/Password/Email/Phone Not Null']); 
+        }
 
         $check_mail = $this->uniqEmail($email);
         $check_user = $this->uniqUser($username);
