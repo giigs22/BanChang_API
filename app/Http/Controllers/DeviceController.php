@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Classes\ApiHelper;
 use App\Classes\Helpers;
 use App\Models\Device;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -246,23 +247,28 @@ class DeviceController extends Controller
     public function filter_data(Request $request)
     {
         $widget = $request->widget;
-        $cond = $request->filter['cond'];
-        $keyword = $request->filter['keyword'];
+        $cond = isset($request->filter['cond'])?$request->filter['cond']:"";
+        $keyword = isset($request->filter['keyword'])?$request->filter['keyword']:"";
         $start_date = $request->filter['start_date'];
         $end_date = $request->filter['end_date'];
+
+        $con_start = Carbon::createFromTimestampMs($start_date);
+        $con_end = Carbon::createFromTimestampMs($end_date);
+        $diff = $con_start->diffInDays($con_end);
 
         //DB::enableQueryLog();
 
         if ($widget == 'env') {
             $device = Device::where('widget_id', '1');
-            $keys = ['co2', 'pm25', 'pm10', 'humid', 'uv', 'voc', 'temp'];
+            $keys_data = ['co2','pm25','pm10','humid','uv','voc','temp'];
         }
         if ($widget == 'smlight') {
             $device = Device::where('widget_id', '2');
-            $keys = ['energy'];
+            $keys_data = ['energy'];
         }
         if ($widget == 'smpole') {
             $device = Device::where('widget_id', '3');
+            $keys_data= ['energy'];
         }
 
         if (!empty($cond)) {
@@ -287,22 +293,22 @@ class DeviceController extends Controller
             $get_location = $this->helpers->getLocation($get_attr);
             $get_status = $this->helpers->getStatus($get_attr);
             $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, null, $start_date, $end_date, null);
-            $process_data = $this->processData($get_data->all, $keys);
+            $process_data = $this->processData($get_data->all,$keys_data);
 
             $data['device'] = $value;
             $data['data'] = $process_data;
             $data['location'] = $get_location;
             $data['status'] = $get_status;
-            $data['date_search'] = ['start_date' => $start_date, 'end_date' => $end_date];
+            $data['date_data'] = ['start'=>$con_start,'end'=>$con_end,'diff'=>$diff]; 
 
             $result[] = $data;
         }
 
         return $result;
     }
-    public function processData($data, $keys)
+    public function processData($data,$keys_data)
     {
-        //$keys = collect($data[0])->keys();
+        $keys = collect($data[0])->keys();
 
         foreach ($keys as $key => $value) {
             foreach ($data as $key2 => $value2) {
@@ -311,9 +317,19 @@ class DeviceController extends Controller
                 }
             }
             $collect = collect($group_keys[$value]);
-            $avg[$value] = $collect->avg();
+            $group[$value] = $collect;
         }
-        return $avg;
+
+        $avg_data = [];
+            foreach ($group as $key2 => $value2) {
+                 if(in_array($key2,$keys_data)){
+                    $sdata[$key2] = $value2;
+                    $collect = collect($sdata[$key2]);
+                    $avg_data[$key2] = $collect->avg();
+                 }
+            }
+            return $avg_data;
+        
     }
 
 }
