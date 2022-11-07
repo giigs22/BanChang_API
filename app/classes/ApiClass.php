@@ -60,6 +60,21 @@ class ApiHelper
 
         return $data;
     }
+    public function getHistoryAPIByDevice($device, $key = 'all', $start, $end, $limit = 10000)
+    {
+        $end_point = str_replace('{device_id}', $device, $this->api_last);
+        $url_full = $this->getFullUrl($end_point . '/history');
+
+        $response = Http::get($url_full, [
+            'limit' => $limit,
+            'keys' => $key,
+            'startTs' => $start,
+            'endTs' => $end,
+        ]);
+        $data = json_decode($response);
+
+        return $data;
+    }
     public function getFullUrl($end_point)
     {
         return $this->api_url . $end_point;

@@ -7,7 +7,6 @@ use App\Classes\Helpers;
 use App\Models\Device;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DeviceController extends Controller
 {
@@ -243,6 +242,78 @@ class DeviceController extends Controller
             $key = 'sos';
         }
         return $key;
+    }
+    public function filter_data(Request $request)
+    {
+        $widget = $request->widget;
+        $cond = $request->filter['cond'];
+        $keyword = $request->filter['keyword'];
+        $start_date = $request->filter['start_date'];
+        $end_date = $request->filter['end_date'];
+
+        //DB::enableQueryLog();
+
+        if ($widget == 'env') {
+            $device = Device::where('widget_id', '1');
+            $keys = ['co2', 'pm25', 'pm10', 'humid', 'uv', 'voc', 'temp'];
+        }
+        if ($widget == 'smlight') {
+            $device = Device::where('widget_id', '2');
+            $keys = ['energy'];
+        }
+        if ($widget == 'smpole') {
+            $device = Device::where('widget_id', '3');
+        }
+
+        if (!empty($cond)) {
+            if ($cond == 'id') {
+                $device = $device->where('id', $keyword);
+            }
+            if ($cond == 'device_id') {
+                $device = $device->where('device_id', $keyword);
+            }
+            if ($cond == 'name') {
+                $device = $device->where('name', 'like', '%' . $keyword . '%');
+            }
+            if ($cond == 'device_name') {
+                $device = $device->where('device_name', 'like', '%' . $keyword . '%');
+            }
+        }
+
+        $data_device = $device->get();
+        $result = [];
+        foreach ($data_device as $key => $value) {
+            $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
+            $get_location = $this->helpers->getLocation($get_attr);
+            $get_status = $this->helpers->getStatus($get_attr);
+            $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, null, $start_date, $end_date, null);
+            $process_data = $this->processData($get_data->all, $keys);
+
+            $data['device'] = $value;
+            $data['data'] = $process_data;
+            $data['location'] = $get_location;
+            $data['status'] = $get_status;
+            $data['date_search'] = ['start_date' => $start_date, 'end_date' => $end_date];
+
+            $result[] = $data;
+        }
+
+        return $result;
+    }
+    public function processData($data, $keys)
+    {
+        //$keys = collect($data[0])->keys();
+
+        foreach ($keys as $key => $value) {
+            foreach ($data as $key2 => $value2) {
+                if (isset($value2->$value)) {
+                    $group_keys[$value][] = $value2->$value[0]->value;
+                }
+            }
+            $collect = collect($group_keys[$value]);
+            $avg[$value] = $collect->avg();
+        }
+        return $avg;
     }
 
 }

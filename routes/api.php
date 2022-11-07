@@ -78,13 +78,15 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('list/{cate}', [DeviceController::class, 'list_by_cate']);
         Route::post('map_data', [DeviceController::class, 'map_data']);
         Route::get('map_data/{id}', [DeviceController::class, 'map_data_device']);
+        Route::post('filter', [DeviceController::class, 'filter_data']);
+
     });
 
     Route::group(['prefix' => 'complaint'], function () {
-        Route::get('{id}',[ComplaintController::class,'complaint_by_id']);
-        Route::post('store',[ComplaintController::class,'store']);
+        Route::get('{id}', [ComplaintController::class, 'complaint_by_id']);
+        Route::post('store', [ComplaintController::class, 'store']);
         Route::post('list', [ComplaintController::class, 'list_complanit']);
-        Route::delete('destroy/{id}',[ComplaintController::class,'destroy']);
+        Route::delete('destroy/{id}', [ComplaintController::class, 'destroy']);
 
     });
 });

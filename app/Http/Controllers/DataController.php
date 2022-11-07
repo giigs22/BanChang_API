@@ -17,54 +17,55 @@ use Illuminate\Support\Facades\Http;
 
 class DataController extends Controller
 {
-    public function get_data(Request $request, $type, $sensor, $option = null)
+    public function get_data($type, $sensor, $option = null)
     {
+        $envCon = new EnvController;
+        $smpCon = new SmartPoleController;
+        $wfCon = new WifiController;
+        $cctvCon = new CCTVController;
+        $smCon = new SmartLightController;
+        $cctvCon = new CCTVController;
+        $digi = new DigitalSignageController;
+        $sos = new SOSController;
+
         if ($type == 'lastdata') {
             if ($sensor == 'env') {
-                $envCon = new EnvController;
                 if ($option == 'view') {
                     $data = $envCon->responseDataView();
                 } else {
                     $data = $envCon->responseData();
                 }
             } elseif ($sensor == 'smart_pole') {
-                $smpCon = new SmartPoleController;
                 if ($option == 'view') {
                     $data = $smpCon->responseDataView();
                 } else {
                     $data = $smpCon->responseData();
                 }
             } elseif ($sensor == 'wifi') {
-                $wfCon = new WifiController;
-                if($option == 'view'){
+                if ($option == 'view') {
                     $data = $wfCon->responseDataView();
-                }else{
+                } else {
                     $data = $wfCon->responseData();
                 }
             } elseif ($sensor == 'cctv_sur') {
-                $cctvCon = new CCTVController;
                 if ($option == 'chartdata') {
                     $setdata = $cctvCon->responseData('attr');
                     $data = $cctvCon->groupSur($setdata);
                 }
             } elseif ($sensor == 'smart_light') {
-                $smCon = new SmartLightController;
                 if ($option == 'view') {
                     $data = $smCon->responseDataView();
                 }
             } elseif ($sensor == 'cctv') {
-                $cctvCon = new CCTVController;
                 if ($option == 'view') {
                     $data = $cctvCon->responseDataView();
                 }
-            }elseif($sensor == 'digi_sig'){
-                $digi = new DigitalSignageController;
-                if($option == 'view'){
+            } elseif ($sensor == 'digi_sig') {
+                if ($option == 'view') {
                     $data = $digi->responseDataView();
                 }
-            }elseif($sensor == 'sos'){
-                $sos = new SOSController;
-                if($option == 'view'){
+            } elseif ($sensor == 'sos') {
+                if ($option == 'view') {
                     $data = $sos->responseDataView();
                 }
             }

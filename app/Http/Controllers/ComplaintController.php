@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class ComplaintController extends Controller
@@ -21,19 +24,43 @@ class ComplaintController extends Controller
             $add->location = $request->location;
             $add->date_complaint = now();
             $add->respon_agen = $request->respon_agen;
-            $add->img_cover = (!empty($request->img_cover))?$request->img_cover:'img_ex_complaint.png';
+            $add->img_cover = (!empty($request->img_cover)) ? $request->img_cover : 'img_ex_complaint.png';
             $add->type = $request->type;
             $add->status = $request->status;
             $add->save();
-            
-            if($add){
+
+            //Image Upload max 4 file
+            $file = $request->file_upload;
+            $ext = ['jpg', 'jpeg', 'png'];
+            if (!empty($file)) {
+                $count_file = count($file);
+                if ($count_file > 4) {
+                    return response()->json(['success' => false, 'message' => 'You can upload a file with a maximum of 3 images']);
+                } else {
+                    foreach ($file as $key => $value) {
+                        $extension = $value->getClientOriginalExtension();
+                        if (in_array($extension, $ext)) {
+                            $fileName = 'comp_' . rand() . "." . $extension;
+                            Storage::disk('public_upload')->put('complaint/' . $fileName, File::get($value));
+
+                            DB::table('img_complaint')->insert([
+                                'file' => $fileName,
+                                "comp_id" => $add->id,
+                                "created_at" => Carbon::now(),
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            if ($add) {
                 return response()->json(['success' => true, 'message' => 'Data has been Save Successfully.']);
             }
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
- 
+
         }
-       
+
     }
     public function list_complanit(Request $request)
     {
@@ -66,7 +93,7 @@ class ComplaintController extends Controller
                 $count_all = $comp->count();
 
             }
-            if (empty($search['start_date']) && !empty($search['end_date'])){
+            if (empty($search['start_date']) && !empty($search['end_date'])) {
                 $comp = $comp->where('date_complaint', $search['end_date']);
                 $count_all = $comp->count();
 
@@ -79,7 +106,7 @@ class ComplaintController extends Controller
         } else {
             $comp = $comp->get();
         }
-        
+
         $list_comp = [];
         foreach ($comp as $key => $value) {
             $data['id'] = $value->id;
