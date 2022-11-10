@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateImgComplaintTable extends Migration
+class CreateImgComplaintsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateImgComplaintTable extends Migration
      */
     public function up()
     {
-        Schema::create('img_complaint', function (Blueprint $table) {
+        Schema::create('img_complaints', function (Blueprint $table) {
             $table->id();
             $table->string('file');
             $table->smallInteger('comp_id');
@@ -28,6 +28,6 @@ class CreateImgComplaintTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('img_complaint');
+        Schema::dropIfExists('img_complaints');
     }
 }

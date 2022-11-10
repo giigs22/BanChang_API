@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WidgetController;
+use App\Models\Complaint;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -83,9 +84,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     });
 
     Route::group(['prefix' => 'complaint'], function () {
-        Route::get('{id}', [ComplaintController::class, 'complaint_by_id']);
         Route::post('store', [ComplaintController::class, 'store']);
-        Route::post('list', [ComplaintController::class, 'list_complanit']);
+        Route::post('list/{type}', [ComplaintController::class, 'list_complaint']);
+        Route::get('list/user/{id}', [ComplaintController::class, 'list_complaint_user_id']);
+        Route::get('{id}', [ComplaintController::class, 'complaint_by_id']);
         Route::delete('destroy/{id}', [ComplaintController::class, 'destroy']);
 
     });

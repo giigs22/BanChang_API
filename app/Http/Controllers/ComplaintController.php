@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,7 +25,6 @@ class ComplaintController extends Controller
             $add->location = $request->location;
             $add->date_complaint = now();
             $add->respon_agen = $request->respon_agen;
-            $add->img_cover = (!empty($request->img_cover)) ? $request->img_cover : 'img_ex_complaint.png';
             $add->type = $request->type;
             $add->status = $request->status;
             $add->save();
@@ -62,13 +62,18 @@ class ComplaintController extends Controller
         }
 
     }
-    public function list_complanit(Request $request)
+    public function list_complaint(Request $request,$type)
     {
         $itemPerpage = $request->itemperpage;
         $start = $request->start;
         $search = $request->search;
 
-        $comp = Complaint::orderBy('id', (empty($search['order_by'])) ? 'ASC' : $search['order_by']);
+        if($type == 'all'){
+            $comp = Complaint::with('img_comp')->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
+        }elseif($type == 'user'){
+            $user = $request->user();
+            $comp = Complaint::with('img_comp')->where('name_complaint',$user->name)->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
+        }
         $stat = collect($comp->get())->countBy('type');
         $count_all = $comp->count();
 
@@ -116,9 +121,9 @@ class ComplaintController extends Controller
             $data['location'] = $value->location;
             $data['date_complaint'] = $value->date_complaint;
             $data['respon_agen'] = $value->respon_agen;
-            $data['img_cover'] = Storage::disk('public_upload')->url('complaint/' . $value->img_cover);
             $data['type'] = $value->type;
             $data['status'] = $value->status;
+            $data['img_comp'] = $this->listImgComp($value->img_comp);
 
             $list_comp[] = $data;
         }
@@ -130,9 +135,30 @@ class ComplaintController extends Controller
 
         return response()->json($data_);
     }
+    public function list_complaint_user_id(Request $request,$user_id)
+    {
+        $user = User::find($user_id);
+        $comp = Complaint::with('img_comp')->where('name_complaint',$user->name)->get();
+        $list_comp = [];
+        foreach ($comp as $key => $value) {
+            $data['id'] = $value->id;
+            $data['title'] = $value->title;
+            $data['detail'] = $value->detail;
+            $data['name_complaint'] = $value->name_complaint;
+            $data['location'] = $value->location;
+            $data['date_complaint'] = $value->date_complaint;
+            $data['respon_agen'] = $value->respon_agen;
+            $data['type'] = $value->type;
+            $data['status'] = $value->status;
+            $data['img_comp'] = $this->listImgComp($value->img_comp);
+
+            $list_comp[] = $data;
+        }
+        return response()->json($list_comp);
+    }
     public function complaint_by_id(Request $request, $id)
     {
-        return Complaint::find($id);
+        return Complaint::with('img_comp')->find($id);
     }
     public function destroy(Request $request, $id)
     {
@@ -141,5 +167,13 @@ class ComplaintController extends Controller
         if ($del) {
             return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
         }
+    }
+    public function listImgComp($data)
+    {
+        $list = [];
+        foreach ($data as $key => $value) {
+            $list[] = Storage::disk('public_upload')->url('complaint/' . $value->file);
+        }
+        return $list;
     }
 }
