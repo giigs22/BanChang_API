@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateImgComplaintsTable extends Migration
+class CreateRepliesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,14 @@ class CreateImgComplaintsTable extends Migration
      */
     public function up()
     {
-        Schema::create('img_complaints', function (Blueprint $table) {
+        Schema::create('replies', function (Blueprint $table) {
             $table->id();
-            $table->string('file');
             $table->bigInteger('comp_id')->unsigned();
+            $table->text('text_reply');
+            $table->bigInteger('user_reply');
             $table->timestamps();
 
             $table->foreign('comp_id')->references('id')->on('complaints')->onDelete('cascade');
-
         });
     }
 
@@ -31,6 +31,6 @@ class CreateImgComplaintsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('img_complaints');
+        Schema::dropIfExists('replies');
     }
 }

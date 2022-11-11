@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use App\Models\ImgComplaint;
+use App\Models\Reply;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -43,11 +45,11 @@ class ComplaintController extends Controller
                             $fileName = 'comp_' . rand() . "." . $extension;
                             Storage::disk('public_upload')->put('complaint/' . $fileName, File::get($value));
 
-                            DB::table('img_complaint')->insert([
-                                'file' => $fileName,
-                                "comp_id" => $add->id,
-                                "created_at" => Carbon::now(),
-                            ]);
+                            $img_add = new ImgComplaint();
+                            $img_add->file= $fileName;
+                            $img_add->comp_id = $add->id;
+                            $img_add->created_at = Carbon::now();
+                            $img_add->save();
                         }
                     }
                 }
@@ -69,10 +71,10 @@ class ComplaintController extends Controller
         $search = $request->search;
 
         if($type == 'all'){
-            $comp = Complaint::with('img_comp')->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
+            $comp = Complaint::with(['img_comp','reply'])->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
         }elseif($type == 'user'){
             $user = $request->user();
-            $comp = Complaint::with('img_comp')->where('name_complaint',$user->name)->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
+            $comp = Complaint::with(['img_comp','reply'])->where('name_complaint',$user->name)->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
         }
         $stat = collect($comp->get())->countBy('type');
         $count_all = $comp->count();
@@ -88,7 +90,10 @@ class ComplaintController extends Controller
 
         }
         if (!empty($search['start_date']) && !empty($search['end_date'])) {
-            $comp = $comp->whereBetween('date_complaint', [$search['start_date'], $search['end_date']]);
+
+            $sdate = Carbon::parse($search['start_date']);
+            $edate = Carbon::parse($search['end_date'].'23:59:59');
+            $comp = $comp->whereBetween('date_complaint', [$sdate, $edate]);
             $count_all = $comp->count();
 
         } else {
@@ -117,6 +122,7 @@ class ComplaintController extends Controller
             $data['id'] = $value->id;
             $data['title'] = $value->title;
             $data['detail'] = $value->detail;
+            $data['reply'] = $value->reply;
             $data['name_complaint'] = $value->name_complaint;
             $data['location'] = $value->location;
             $data['date_complaint'] = $value->date_complaint;
@@ -158,7 +164,39 @@ class ComplaintController extends Controller
     }
     public function complaint_by_id(Request $request, $id)
     {
-        return Complaint::with('img_comp')->find($id);
+        $comp =  Complaint::with('img_comp')->find($id);
+        $data['id'] = $comp->id;
+        $data['title'] = $comp->title;
+        $data['detail'] = $comp->detail;
+        $data['name_complaint'] = $comp->name_complaint;
+        $data['location'] = $comp->location;
+        $data['date_complaint'] = $comp->date_complaint;
+        $data['respon_agen'] = $comp->respon_agen;
+        $data['type'] = $comp->type;
+        $data['status'] = $comp->status;
+        $data['img_comp'] = $this->listImgComp($comp->img_comp);
+
+        return response()->json($data);
+    }
+    public function reply(Request $request)
+    {
+        $comp_id = $request->comp_id;
+        $text_reply = $request->text_reply;
+        $user = $request->user();
+        
+        try {
+            $add = new Reply();
+            $add->comp_id = $comp_id;
+            $add->text_reply = $text_reply;
+            $add->user_reply = $user->id;
+            $add->save();
+
+            if($add){
+                return response()->json(['success'=>true,'message'=>'Reply Success.']);
+            }
+        } catch (Exception $e) {
+            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+        }
     }
     public function destroy(Request $request, $id)
     {

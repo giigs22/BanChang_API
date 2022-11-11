@@ -13,4 +13,8 @@ class Complaint extends Model
     {
         return $this->hasMany(ImgComplaint::class,'comp_id','id');
     }
+    public function reply()
+    {
+        return $this->hasMany(Reply::class,'comp_id','id');
+    }
 }
