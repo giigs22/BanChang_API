@@ -69,10 +69,18 @@ class ComplaintController extends Controller
         $start = $request->start;
         $search = $request->search;
 
+        $req_reply = $request->reply;
+
         if ($type == 'all') {
             $comp = Complaint::with(['img_comp', 'reply.user' => function ($query) {
                 $query->select(['id', 'name']);
             }])->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
+
+            //Get Complaint has Reply
+            if ($req_reply) {
+                $comp = $comp->withCount('reply')->having('reply_count', '>', 0);
+            }
+
         } elseif ($type == 'user') {
             $user = $request->user();
             $comp = Complaint::with(['img_comp', 'reply.user' => function ($query) {
@@ -188,25 +196,41 @@ class ComplaintController extends Controller
     {
         $comp_id = $request->comp_id;
         $text_reply = $request->text_reply;
+        $status = $request->status;
         $user = $request->user();
 
-        try {
-            $add = new Reply();
-            $add->comp_id = $comp_id;
-            $add->text_reply = $text_reply;
-            $add->user_reply = $user->id;
-            $add->save();
+        $role = $user->roles[0]->slug;
+        if ($role == 'administrator' || $role == 'staff') {
+            try {
+                $add = new Reply();
+                $add->comp_id = $comp_id;
+                $add->text_reply = $text_reply;
+                $add->user_reply = $user->id;
+                $add->save();
 
-            if ($add) {
-                return response()->json(['success' => true, 'message' => 'Reply Success.']);
+                if (!empty($status)) {
+                    $update = Complaint::find($comp_id);
+                    $update->status = $status;
+                    $update->save();
+                }
+
+                if ($add) {
+                    return response()->json(['success' => true, 'message' => 'Reply Success.']);
+                }
+            } catch (Exception $e) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()]);
             }
-        } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        } else {
+            return response()->json(['message' => 'Not Authorized'], 403);
         }
     }
     public function destroy(Request $request, $id)
     {
         $del = Complaint::find($id);
+        $img = ImgComplaint::where('comp_id', $id)->get();
+        foreach ($img as $key => $value) {
+            Storage::disk('public_upload')->delete('complaint/' . $value->file, File::delete('complaint/' . $value->file));
+        }
         $del->delete();
         if ($del) {
             return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
