@@ -3,13 +3,13 @@
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataController;
+use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WidgetController;
-use App\Models\Complaint;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -86,10 +86,15 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'complaint'], function () {
         Route::post('store', [ComplaintController::class, 'store']);
         Route::post('list/{type}', [ComplaintController::class, 'list_complaint']);
-        Route::post('reply',[ComplaintController::class,'reply']);
+        Route::post('reply', [ComplaintController::class, 'reply']);
         Route::get('list/user/{id}', [ComplaintController::class, 'list_complaint_user_id']);
         Route::get('{id}', [ComplaintController::class, 'complaint_by_id']);
         Route::delete('destroy/{id}', [ComplaintController::class, 'destroy']);
+
+    });
+
+    Route::group(['prefix' => 'export'], function () {
+        Route::post('csv', [DataExportController::class, 'export_csv']);
 
     });
 });
