@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Complaint;
+use App\Models\ComplaintTopic;
 use App\Models\ImgComplaint;
 use App\Models\Reply;
 use App\Models\User;
@@ -243,5 +244,90 @@ class ComplaintController extends Controller
             $list[] = Storage::disk('public_upload')->url('complaint/' . $value->file);
         }
         return $list;
+    }
+    public function topic_list(Request $request)
+    {
+        $itemPerpage = $request->itemperpage;
+        $start = $request->start;
+        $filter = isset($request->filter)?$request->filter:'';
+
+        $topic = ComplaintTopic::orderBy('id', 'ASC');
+        $count_all = $topic->count();
+
+        if(!empty($filter)){
+            $topic = $topic->where('en','like','%'.$filter.'%')->orWhere('th','like','%'.$filter.'%')->orWhere('id',$filter);
+        }
+
+        if (!empty($start) || !empty($itemPerpage)) {
+            $topic = $topic->offset($start);
+            $topic = $topic->limit($itemPerpage)->get();
+        } else {
+            $topic = $topic->get();
+        }
+
+        $data_ = [];
+        $data_['list'] = $topic;
+        $data_['count_all'] = $count_all;
+
+        return response()->json($data_);
+    }
+    public function topic_by_id(Request $request,$id)
+    {
+        return ComplaintTopic::find($id);
+    }
+    public function topic_store(Request $request)
+    {
+        $topic_en = $request->topic_en;
+        $topic_th = $request->topic_th;
+        $complaint_type = $request->complaint_type;
+        $target_role = strtolower($request->target_role);
+
+        try {
+            $add = new ComplaintTopic();
+            $add->en = $topic_en;
+            $add->th = $topic_th;
+            $add->complaintType = $complaint_type;
+            $add->targetRole = $target_role;
+            $add->save();
+
+            if($add){
+                return response()->json(['success'=>true,'message'=>'Data has been Save Successfully.']);
+ 
+            }
+        } catch (Exception $e) {
+            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+        }
+    }
+    public function topic_update(Request $request)
+    {
+        $id = $request->id;
+        $topic_en = $request->topic_en;
+        $topic_th = $request->topic_th;
+        $complaint_type = $request->complaint_type;
+        $target_role = strtolower($request->target_role);
+
+        try {
+            $update = ComplaintTopic::find($id);
+            $update->en = $topic_en;
+            $update->th = $topic_th;
+            $update->complaintType = $complaint_type;
+            $update->targetRole = $target_role;
+            $update->save();
+
+            if($update){
+                return response()->json(['success'=>true,'message'=>'Update Successfully.']);
+ 
+            }
+        } catch (Exception $e) {
+            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+        }
+    }
+    public function topic_destroy(Request $request, $id)
+    {
+        $del = ComplaintTopic::find($id);
+        $del->delete();
+        if ($del) {
+            return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
+        }
     }
 }
