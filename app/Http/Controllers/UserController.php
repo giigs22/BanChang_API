@@ -141,8 +141,7 @@ class UserController extends Controller
         $hasimg = ImageProfile::where('user_id', $id)->first();
         if (!empty($hasimg)) {
             Storage::disk('public_upload')->delete($hasimg->filename, File::delete($hasimg->filename));
-            $hasimg->filename = $file_decode;
-            $hasimg->save();
+            ImageProfile::where('user_id',$id)->update(['filename'=>$file_decode]);
         } else {
             $add = new ImageProfile();
             $add->user_id = $id;
