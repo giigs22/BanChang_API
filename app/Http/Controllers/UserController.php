@@ -30,17 +30,17 @@ class UserController extends Controller
         $location = $request->location;
         $email = $request->email;
         $phone = $request->phone;
-        
+
         //Default Role User for Register
-        $role_user = Role::where('name','User')->first();
+        $role_user = Role::where('name', 'User')->first();
         $role = (isset($request->role)) ? $request->role : $role_user->id;
 
         $status = (isset($request->status)) ? $request->status : '1';
 
         $profile = $request->profile;
 
-        if(empty($username) || empty($password) || empty($email) || empty($phone)){
-            return response()->json(['success' => false, 'message' => 'Field Username/Password/Email/Phone Not Null']); 
+        if (empty($username) || empty($password) || empty($email) || empty($phone)) {
+            return response()->json(['success' => false, 'message' => 'Field Username/Password/Email/Phone Not Null']);
         }
 
         $check_mail = $this->uniqEmail($email);
@@ -233,8 +233,9 @@ class UserController extends Controller
 
             if (!empty($profile)) {
                 $db_img = ImageProfile::where('user_id', $id)->first();
-                Storage::disk('public_upload')->delete($db_img->filename, File::delete($db_img->filename));
-
+                if (!empty($db_img)) {
+                    Storage::disk('public_upload')->delete($db_img->filename, File::delete($db_img->filename));
+                }
                 $this->uploadProfile($id, $profile);
             }
             DB::commit();
@@ -250,8 +251,8 @@ class UserController extends Controller
     {
         $del = User::find($id);
         $img = ImageProfile::where('user_id', $id)->first();
-        if(!empty($img)){
-        Storage::disk('public_upload')->delete($img->filename, File::delete($img->filename));
+        if (!empty($img)) {
+            Storage::disk('public_upload')->delete($img->filename, File::delete($img->filename));
         }
 
         $del->delete();
