@@ -19,7 +19,7 @@ class DataController extends Controller
 {
     public function __construct()
     {
-        ini_set('max_execution_time', 300);
+        ini_set('max_execution_time', 600);
     }
     public function get_data($type, $sensor, $option = null)
     {

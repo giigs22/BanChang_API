@@ -13,6 +13,8 @@ class DeviceController extends Controller
 {
     public function __construct()
     {
+        ini_set('max_execution_time', 600);
+
         $this->api_helper = new ApiHelper;
         $this->helpers = new Helpers;
     }
@@ -302,12 +304,14 @@ class DeviceController extends Controller
             $data['date_data'] = ['start'=>$con_start,'end'=>$con_end,'diff'=>$diff]; 
 
             $result[] = $data;
+            
         }
 
         return $result;
     }
     public function processData($data,$keys_data)
     {
+        if(!empty($data[0])){
         $keys = collect($data[0])->keys();
 
         foreach ($keys as $key => $value) {
@@ -329,6 +333,12 @@ class DeviceController extends Controller
                  }
             }
             return $avg_data;
+        }else{
+            foreach ($keys_data as $key => $value) {
+                $sdata[$value] = 0;
+            }
+            return $sdata;
+        }
         
     }
 
