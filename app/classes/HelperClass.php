@@ -8,44 +8,23 @@ class Helpers
         $online = 0;
         $offline = 0;
 
-        foreach ($data as $key => $value) {
-            if ($value[4]->key == 'active') {
-                $val = $value[4]->value;
-                if (empty($val)) {
-                    $offline += 1;
-                } else {
-                    $online += 1;
-                }
-            } elseif ($value[6]->key == 'active') {
-                $val = $value[6]->value;
-                if (empty($val)) {
-                    $offline += 1;
-                } else {
-                    $online += 1;
-                }
-            } elseif ($value[32]->key == 'active') {
-                $val = $value[32]->value;
-                if (empty($val)) {
-                    $offline += 1;
-                } else {
-                    $online += 1;
-                }
-            } elseif ($value[34]->key == 'active') {
-                $val = $value[34]->value;
-                if (empty($val)) {
-                    $offline += 1;
-                } else {
-                    $online += 1;
-                }
-            }
+        if(isset($data['True'])){
+            $online = $data['True'];
         }
+        if(isset($data['0'])){
+            $offline = $data['0'];
+        }
+        if(isset($data['False'])){
+            $offline = $offline + $data['False'];
+        }
+        
         return ['online' => $online, 'offline' => $offline];
     }
     public function getStatus($data)
     {
         foreach ($data as $key => $value) {
             if ($value->key == 'active') {
-                if ($value->value) {
+                if ($value->value || $value->value == 'True') {
                     return 1;
                 } else {
                     return 0;

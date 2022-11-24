@@ -23,8 +23,18 @@ class WifiController extends Controller
     public function responseStatus()
     {
         $get_attr = $this->api_helper->getAttrDataAPI($this->device);
-        $status = $this->helpers->statusDevice($get_attr);
-        return $status;
+        foreach ($get_attr as $key => $value) {
+            foreach ($value as $key2 => $value2) {
+               if($value2->key == 'active'){
+                   $sdt[] = $value2;
+               }
+            }
+       }
+       $collect = collect($sdt);
+       $group_status = $collect->countBy('value');
+       $status = $this->helpers->statusDevice($group_status);
+
+       return $status;
     }
     public function responseDataView()
     {

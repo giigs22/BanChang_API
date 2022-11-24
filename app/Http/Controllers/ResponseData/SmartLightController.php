@@ -17,10 +17,19 @@ class SmartLightController extends Controller
     }
     public function responseStatus()
     {
-        $get_data = $this->api_helper->getLastDataAPI($this->device);
-
-        $status = $this->status_lamp($get_data);
-        return $status;
+        $get_data = $this->api_helper->getAttrDataAPI($this->device);
+        foreach ($get_data as $key => $value) {
+            foreach ($value as $key2 => $value2) {
+               if($value2->key == 'active'){
+                   $sdt[] = $value2;
+               }
+            }
+       }
+       $collect = collect($sdt);
+       $group_status = $collect->countBy('value');
+       $status = $this->helpers->statusDevice($group_status);
+       
+       return $status;
     }
     public function responseDataView()
     {
@@ -60,5 +69,6 @@ class SmartLightController extends Controller
             }
         }
         return ['online' => $online, 'offline' => $offline];
+       
     }
 }

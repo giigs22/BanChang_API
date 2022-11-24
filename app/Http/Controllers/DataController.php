@@ -106,9 +106,19 @@ class DataController extends Controller
         $list_device = Device::all();
         $api_helper = new ApiHelper;
         $helpers = new Helpers;
-        $list_status = $api_helper->getAttrDataAPI($list_device);
-        $status = $helpers->statusDevice($list_status);
+        $list_attr = $api_helper->getAttrDataAPI($list_device);
 
+         foreach ($list_attr as $key => $value) {
+             foreach ($value as $key2 => $value2) {
+                if($value2->key == 'active'){
+                    $sdt[] = $value2;
+                }
+             }
+        }
+        $collect = collect($sdt);
+        $group_status = $collect->countBy('value');
+        $status = $helpers->statusDevice($group_status);
+        
         return $status;
 
     }

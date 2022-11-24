@@ -130,11 +130,14 @@ class DeviceController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
                     $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
                     $data['data'] = $get_data;
                     $data['location'] = $get_location;
+                    $data['status'] = $get_status;
                     $mapdata[] = $data;
                 }
             }
@@ -144,11 +147,15 @@ class DeviceController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
                     $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
                     $data['data'] = $get_data;
                     $data['location'] = $get_location;
+                    $data['status'] = $get_status;
+
                     $mapdata[] = $data;
                 }
             }
@@ -158,11 +165,15 @@ class DeviceController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
                     $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
                     $data['data'] = $get_data;
                     $data['location'] = $get_location;
+                    $data['status'] = $get_status;
+
                     $mapdata[] = $data;
                 }
             }
@@ -172,11 +183,15 @@ class DeviceController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
                     $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
                     $data['data'] = $get_data;
                     $data['location'] = $get_location;
+                    $data['status'] = $get_status;
+
                     $mapdata[] = $data;
                 }
             }
@@ -186,11 +201,33 @@ class DeviceController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
                     $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
                     $data['widget'] = $value;
                     $data['device_id'] = $value2['id'];
                     $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
                     $data['data'] = $get_data;
                     $data['location'] = $get_location;
+                    $data['status'] = $get_status;
+
+                    $mapdata[] = $data;
+                }
+            }
+            if ($value == 'sos') {
+                $device = Device::where('widget_id', 12)->get();
+                foreach ($device as $key2 => $value2) {
+                    $get_attr = $this->api_helper->getAttrDataAPIByDevice($value2->device_id);
+                    $get_data = $this->api_helper->getLastDataAPIByDevice($value2->device_id);
+                    $get_location = $this->helpers->getLocation($get_attr);
+                    $get_status = $this->helpers->getStatus($get_attr);
+
+                    $data['widget'] = $value;
+                    $data['device_id'] = $value2['id'];
+                    $data['name'] = !empty($value2['location_name']) ? $value2['location_name'] : $value2['device_name'];
+                    $data['data'] = $get_data;
+                    $data['location'] = $get_location;
+                    $data['status'] = $get_status;
+
                     $mapdata[] = $data;
                 }
             }
@@ -270,6 +307,10 @@ class DeviceController extends Controller
         }
         if ($widget == 'smpole') {
             $device = Device::where('widget_id', '3');
+            $keys_data= ['energy'];
+        }
+        if($widget == 'wifi'){
+            $device = Device::where('widget_id','9');
             $keys_data= ['energy'];
         }
 
