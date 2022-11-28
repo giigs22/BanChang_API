@@ -6,6 +6,8 @@ use App\Classes\ApiHelper;
 use App\Classes\Helpers;
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class CCTVController extends Controller
 {
@@ -31,11 +33,11 @@ class CCTVController extends Controller
         $get_attr = $this->api_helper->getAttrDataAPI($this->device);
         foreach ($get_attr as $key => $value) {
             foreach ($value as $key2 => $value2) {
-               if($value2->key == 'active'){
-                   $sdt[] = $value2;
-               }
+                if ($value2->key == 'active') {
+                    $sdt[] = $value2;
+                }
             }
-       }
+        }
         $collect = collect($sdt);
         $group_status = $collect->countBy('value');
         $status = $this->helpers->statusDevice($group_status);
@@ -52,13 +54,11 @@ class CCTVController extends Controller
             $get_status = $this->helpers->getStatus($get_attr);
             $url_rtsp = $this->getRTSP($get_attr);
 
-           
-
             $setdata['id'] = $value->id;
             $setdata['widget'] = 'cctv';
             $setdata['name'] = $value->location_name !== null ? $value->location_name : $value->device_name;
             $setdata['data'] = $get_data;
-            $setdata['rtsp']  = $url_rtsp;
+            $setdata['rtsp'] = $url_rtsp;
             $setdata['location'] = $get_location;
             $setdata['status'] = $get_status;
             $data[] = $setdata;
@@ -88,10 +88,18 @@ class CCTVController extends Controller
     public function getRTSP($data)
     {
         foreach ($data as $key => $value) {
-            if($value->key == 'rtsp'){
+            if ($value->key == 'rtsp') {
                 return $value->value;
-            }            
+            }
         }
+    }
+    public function streaming(Request $request)
+    {
+        $url = "http://cctv.banchang.online/restreaming";
+        $response = Http::post($url, ["url_rtsp" => $request->url_rtsp]);
+        $data = json_decode($response);
+
+        return $data;
     }
 
 }

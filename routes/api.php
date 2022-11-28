@@ -6,6 +6,7 @@ use App\Http\Controllers\DataController;
 use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\ResponseData\CCTVController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
@@ -27,6 +28,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('get_data/{type}/{sensor}/{option?}', [DataController::class, 'get_data']);
     Route::get('get_status/{sensor}', [DataController::class, 'get_status']);
     Route::get('status/all', [DataController::class, 'device_all']);
+    Route::post('streaming', [CCTVController::class, 'streaming']);
 
     Route::post('logger', [LogController::class, 'save_log']);
     Route::post('setting/update', [SettingController::class, 'update']);
@@ -90,11 +92,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('list/user/{id}', [ComplaintController::class, 'list_complaint_user_id']);
         Route::get('{id}', [ComplaintController::class, 'complaint_by_id']);
         Route::delete('destroy/{id}', [ComplaintController::class, 'destroy']);
-        Route::post('topic/list',[ComplaintController::class,'topic_list']);
-        Route::post('topic/store',[ComplaintController::class,'topic_store']);
-        Route::patch('topic/update/{id}',[ComplaintController::class,'topic_update']);
-        Route::delete('topic/destroy/{id}',[ComplaintController::class,'topic_destroy']);
-        Route::get('topic/{id}',[ComplaintController::class,'topic_by_id']);
+        Route::post('topic/list', [ComplaintController::class, 'topic_list']);
+        Route::post('topic/store', [ComplaintController::class, 'topic_store']);
+        Route::patch('topic/update/{id}', [ComplaintController::class, 'topic_update']);
+        Route::delete('topic/destroy/{id}', [ComplaintController::class, 'topic_destroy']);
+        Route::get('topic/{id}', [ComplaintController::class, 'topic_by_id']);
+        Route::post('export', [ComplaintController::class, 'export']);
 
     });
 

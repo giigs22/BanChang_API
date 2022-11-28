@@ -249,13 +249,13 @@ class ComplaintController extends Controller
     {
         $itemPerpage = $request->itemperpage;
         $start = $request->start;
-        $filter = isset($request->filter)?$request->filter:'';
+        $filter = isset($request->filter) ? $request->filter : '';
 
         $topic = ComplaintTopic::orderBy('id', 'ASC');
         $count_all = $topic->count();
 
-        if(!empty($filter)){
-            $topic = $topic->where('en','like','%'.$filter.'%')->orWhere('th','like','%'.$filter.'%')->orWhere('id',$filter);
+        if (!empty($filter)) {
+            $topic = $topic->where('en', 'like', '%' . $filter . '%')->orWhere('th', 'like', '%' . $filter . '%')->orWhere('id', $filter);
         }
 
         if (!empty($start) || !empty($itemPerpage)) {
@@ -271,7 +271,7 @@ class ComplaintController extends Controller
 
         return response()->json($data_);
     }
-    public function topic_by_id(Request $request,$id)
+    public function topic_by_id(Request $request, $id)
     {
         return ComplaintTopic::find($id);
     }
@@ -290,12 +290,12 @@ class ComplaintController extends Controller
             $add->targetRole = $target_role;
             $add->save();
 
-            if($add){
-                return response()->json(['success'=>true,'message'=>'Data has been Save Successfully.']);
- 
+            if ($add) {
+                return response()->json(['success' => true, 'message' => 'Data has been Save Successfully.']);
+
             }
         } catch (Exception $e) {
-            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
     public function topic_update(Request $request)
@@ -314,12 +314,12 @@ class ComplaintController extends Controller
             $update->targetRole = $target_role;
             $update->save();
 
-            if($update){
-                return response()->json(['success'=>true,'message'=>'Update Successfully.']);
- 
+            if ($update) {
+                return response()->json(['success' => true, 'message' => 'Update Successfully.']);
+
             }
         } catch (Exception $e) {
-            return response()->json(['success'=>false,'message'=>$e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
     public function topic_destroy(Request $request, $id)
@@ -328,6 +328,72 @@ class ComplaintController extends Controller
         $del->delete();
         if ($del) {
             return response()->json(['success' => true, 'message' => 'Data has been Delete Successfully.']);
+        }
+    }
+    public function export(Request $request)
+    {
+        $data = $request->data;
+        $freq = $request->freq;
+        $option = $request->option;
+
+        $start = Carbon::createFromTimestampMs($option['start'], config('app.timezone'));
+        $end = Carbon::createFromTimestampMs($option['end'], config('app.timezone'));
+
+        $start = $start->format('Y-m-d H:i:s');
+        $end = $end->format('Y-m-d H:i:s');
+
+        $comp = Complaint::whereBetween('date_complaint', [$start, $end]);
+
+        if ($data == 'sum') {
+            $comp = $comp->get();
+            $collect = collect($comp);
+            $group = $collect->countBy('type');
+
+            $keys = ['electricity', 'etc', 'water', 'disturbance'];
+            if ($group->count() > 0) {
+
+                foreach ($group as $key2 => $value) {
+
+                    $sdata[$key2] = $value;
+
+                }
+
+            } else {
+                foreach ($keys as $value2) {
+                    $sdata[$value2] = 0;
+                }
+            }
+            return $sdata;
+
+        } else {
+
+            if ($data == 'electricity') {
+                $comp = $comp->where('type', $data)->get();
+                $collect = collect($comp);
+                $group = $collect->countBy('type');
+
+            } elseif ($data == 'etc') {
+                $comp = $comp->where('type', $data)->get();
+                $collect = collect($comp);
+                $group = $collect->countBy('type');
+
+            } elseif ($data == 'water') {
+                $comp = $comp->where('type', $data)->get();
+                $collect = collect($comp);
+                $group = $collect->countBy('type');
+
+            } elseif ($data == 'disturbance') {
+                $comp = $comp->where('type', $data)->get();
+                $collect = collect($comp);
+                $group = $collect->countBy('type');
+            }
+
+            if ($group->count() > 0) {
+                return $group;
+            } else {
+                return json_encode([$data => 0]);
+            }
+
         }
     }
 }
