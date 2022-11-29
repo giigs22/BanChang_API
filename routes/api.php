@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChartDataController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ResponseData\CCTVController;
+use App\Http\Controllers\ResponseData\SOSController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
@@ -29,6 +31,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('get_status/{sensor}', [DataController::class, 'get_status']);
     Route::get('status/all', [DataController::class, 'device_all']);
     Route::post('streaming', [CCTVController::class, 'streaming']);
+    Route::post('chartdata',[ChartDataController::class,'get_data']);
 
     Route::post('logger', [LogController::class, 'save_log']);
     Route::post('setting/update', [SettingController::class, 'update']);
@@ -98,11 +101,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::delete('topic/destroy/{id}', [ComplaintController::class, 'topic_destroy']);
         Route::get('topic/{id}', [ComplaintController::class, 'topic_by_id']);
         Route::post('export', [ComplaintController::class, 'export']);
+        Route::get('stat/widget',[ComplaintController::class,'stat']);
 
     });
 
     Route::group(['prefix' => 'export'], function () {
         Route::post('csv', [DataExportController::class, 'export_csv']);
+
+    });
+
+    Route::group(['prefix' => 'sos'], function () {
+        Route::get('stat/widget', [SOSController::class, 'stat']);
 
     });
 });

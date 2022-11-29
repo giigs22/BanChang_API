@@ -396,4 +396,12 @@ class ComplaintController extends Controller
 
         }
     }
+    public function stat()
+    {
+        $all = Complaint::count();
+        $pending = Complaint::where('status','pending')->count();
+        $received = Complaint::where('status','received')->count();
+
+        return response()->json(['all'=>$all,'pending'=>$pending,'received'=>$received]); 
+    }
 }

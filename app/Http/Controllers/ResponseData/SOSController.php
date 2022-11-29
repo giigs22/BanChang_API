@@ -42,4 +42,19 @@ class SOSController extends Controller
         $list = Device::where('widget_id', 12)->get();
         return $list;
     }
+    public function stat()
+    {
+        $device = $this->device;
+        $data = [];
+        foreach ($device as $key => $value) {
+            $get_data = $this->api_helper->getLastDataAPIByDevice($value->device_id);
+
+            $setdata['data'] = $get_data;
+            $data[] = $setdata;
+        }
+        foreach ($data as $key => $value) {
+            $calls[] = $value['data']->calls;
+        }
+        return $calls;
+    }
 }
