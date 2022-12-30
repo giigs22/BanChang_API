@@ -7,6 +7,7 @@ use App\Classes\Helpers;
 use App\Http\Controllers\ResponseData\CCTVController;
 use App\Http\Controllers\ResponseData\DigitalSignageController;
 use App\Http\Controllers\ResponseData\EnvController;
+use App\Http\Controllers\ResponseData\LicensePlateController;
 use App\Http\Controllers\ResponseData\SmartLightController;
 use App\Http\Controllers\ResponseData\SmartPoleController;
 use App\Http\Controllers\ResponseData\SOSController;
@@ -31,6 +32,7 @@ class DataController extends Controller
         $cctvCon = new CCTVController;
         $digi = new DigitalSignageController;
         $sos = new SOSController;
+        $license = new LicensePlateController;
 
         if ($type == 'lastdata') {
             if ($sensor == 'env') {
@@ -53,7 +55,7 @@ class DataController extends Controller
                 }
             } elseif ($sensor == 'cctv_sur') {
                 if ($option == 'chartdata') {
-                    $setdata = $cctvCon->responseData('attr');
+                    $setdata = $cctvCon->responseData();
                     $data = $cctvCon->groupSur($setdata);
                 }
             } elseif ($sensor == 'smart_light') {
@@ -72,6 +74,11 @@ class DataController extends Controller
                 if ($option == 'view') {
                     $data = $sos->responseDataView();
                 }
+            }elseif($sensor == 'check_license_plate'){
+                if($option == 'stat')
+                $data = $license->responseStat();
+            }elseif($sensor == 'license_plate'){
+                $data = $license->responseData();
             }
         }
 

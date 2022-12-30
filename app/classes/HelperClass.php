@@ -1,6 +1,10 @@
 <?php
 namespace App\Classes;
 
+use Carbon\Carbon;
+use Carbon\CarbonInterval;
+use Carbon\CarbonPeriod;
+
 class Helpers
 {
     public function statusDevice($data)
@@ -8,11 +12,14 @@ class Helpers
         $online = 0;
         $offline = 0;
 
-        if(isset($data['True'])){
-            $online = $data['True'];
+        if(isset($data['1'])){
+            $online = $data['1'];
         }
         if(isset($data['0'])){
             $offline = $data['0'];
+        }
+        if(isset($data['True'])){
+            $online = $online + $data['True'];
         }
         if(isset($data['False'])){
             $offline = $offline + $data['False'];
@@ -22,15 +29,18 @@ class Helpers
     }
     public function getStatus($data)
     {
+        
         foreach ($data as $key => $value) {
             if ($value->key == 'active') {
-                if ($value->value || $value->value == 'True') {
-                    return 1;
-                } else {
-                    return 0;
-                }
+                 if ($value->value || $value->value == "True") {
+                     $status = 1;
+                 }
+                 if($value->value == false || $value->value == "False") {
+                     $status = 0;
+                 }
             }
         }
+        return $status;
     }
     public function getLocation($data)
     {
@@ -44,4 +54,73 @@ class Helpers
         }
         return $location;
     }
+    public function setDayHourRange($data)
+    {
+        $start = Carbon::createFromTimestampMs($data['start'], config('app.timezone'));
+
+        $s = $start->startOfDay()->toDayDateTimeString();
+        $e = $start->endOfDay()->toDayDateTimeString();
+
+        $pre = CarbonInterval::hours(1)->toPeriod($s, $e);
+
+        foreach ($pre as $key => $value) {
+            $list_time[] = $value->valueOf();
+        }
+        return $list_time;
+
+    }
+    public function setDayRange($option)
+    {
+        $start = $option['start'];
+        $end = $option['end'];
+
+        $parse_start = Carbon::createFromTimestampMs($start);
+        $parse_end = Carbon::createFromTimestampMs($end);
+
+        $setdate = CarbonPeriod::create($parse_start, $parse_end);
+        foreach ($setdate as $date) {
+            $date_format = Carbon::create($date);
+            $start = $date_format->startOfDay()->toDateTimeString();
+            $end = $date_format->endOfDay()->toDateTimeString();
+            $ts_start = Carbon::create($start)->valueOf();
+            $ts_end = Carbon::create($end)->valueOf();
+            $date_list[] = [$ts_start, $ts_end];
+        }
+        return $date_list;
+    }
+    public function AvgMultiArray($data)
+    {
+        $val = [];
+        foreach ($data as $key => $value) {
+            $val[] = $value->value;
+        }
+
+        $collect = collect($val);
+        $avg_data = $collect->avg();
+        return $avg_data;
+    }
+    public function AvgArray($arr)
+    {
+        $collect = collect($arr);
+        $avg_data = $collect->avg();
+        return $avg_data;
+    }
+    public function widgetKey($id)
+    {
+        if ($id == '1') {
+            $key = 'aqi';
+        } elseif ($id == '2') {
+            $key = 'smlight';
+        } elseif ($id == '3') {
+            $key = 'smpole';
+        } elseif ($id == '4') {
+            $key = 'cctv';
+        } elseif ($id == '9') {
+            $key = 'wifi';
+        } elseif ($id == '12') {
+            $key = 'sos';
+        }
+        return $key;
+    }
+    
 }

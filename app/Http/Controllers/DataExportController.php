@@ -59,7 +59,7 @@ class DataExportController extends Controller
 
         }
         if ($freq == 'week' || $freq == 'month' || $freq == 'year') {
-            $daysList = $this->setDayRange($option);
+            $daysList = $this->helpers->setDayRange($option);
             $list_data = [];
             $f_list_data = [];
             $day_data = [];
@@ -118,24 +118,5 @@ class DataExportController extends Controller
         $collect = collect($val);
         $avg_data = $collect->avg();
         return $avg_data;
-    }
-    public function setDayRange($option)
-    {
-        $start = $option['start'];
-        $end = $option['end'];
-
-        $parse_start = Carbon::createFromTimestampMs($start);
-        $parse_end = Carbon::createFromTimestampMs($end);
-
-        $setdate = CarbonPeriod::create($parse_start, $parse_end);
-        foreach ($setdate as $date) {
-            $date_format = Carbon::create($date);
-            $start = $date_format->startOfDay()->toDateTimeString();
-            $end = $date_format->endOfDay()->toDateTimeString();
-            $ts_start = Carbon::create($start)->valueOf();
-            $ts_end = Carbon::create($end)->valueOf();
-            $date_list[] = [$ts_start, $ts_end];
-        }
-        return $date_list;
     }
 }

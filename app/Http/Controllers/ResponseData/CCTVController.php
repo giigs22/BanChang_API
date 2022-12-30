@@ -17,13 +17,13 @@ class CCTVController extends Controller
         $this->helpers = new Helpers;
         $this->device = $this->getListDevice();
     }
-    public function responseData($type = 'last')
+    public function responseData()
     {
-        if ($type == 'attr') {
-            $get_data = $this->api_helper->getAttrDataAPI($this->device);
-        } else {
+        //if ($type == 'attr') {
+         //   $get_data = $this->api_helper->getAttrDataAPI($this->device);
+        //} else {
             $get_data = $this->api_helper->getLastDataAPI($this->device);
-        }
+       // }
 
         return $get_data;
 
@@ -73,13 +73,14 @@ class CCTVController extends Controller
     }
     public function groupSur($data)
     {
-        $keys = ['faceReg_alllist_daily', 'faceReg_blacklist_daily', 'tracking_daily', 'wrongDirection_daily', 'prohibitedArea_daily', 'prohibitedParking_daily', 'lpr_allplate_daily', 'lpr_blacklist_daily'];
+        //$keys = ['faceReg_alllist_daily', 'faceReg_blacklist_daily', 'tracking_daily', 'wrongDirection_daily', 'prohibitedArea_daily', 'prohibitedParking_daily', 'lpr_allplate_daily', 'lpr_blacklist_daily'];
+        $keys = ['faceReg_alllist','face_recognition','tracking','wrong_direction','wrongDirection','no_park','traffic_rate'];
         $group_data = [];
         foreach ($data as $key => $value) {
             $data2 = $value;
             foreach ($data2 as $key2 => $value2) {
-                if (in_array($value2->key, $keys)) {
-                    $group_data[$value2->key][] = $value2;
+                if (in_array($key2, $keys)) {
+                    $group_data[$key2][] = $value2;
                 }
             }
         }
@@ -100,6 +101,13 @@ class CCTVController extends Controller
         $data = json_decode($response);
 
         return $data;
+    }
+    public function streaming_check(Request $request)
+    {
+        $url = $request->live_url;
+        $response = Http::get($url);
+        
+        return $response->status();
     }
 
 }

@@ -382,5 +382,62 @@ class DeviceController extends Controller
         }
         
     }
+    public function filter_data_ds(Request $request)
+    {
+        $widget = $request->widget;
+        $cond = isset($request->filter['cond'])?$request->filter['cond']:"";
+        $keyword = isset($request->filter['keyword'])?$request->filter['keyword']:"";
+   
+        $device = Device::where('widget_id', '10');
+      
+
+        if (!empty($cond)) {
+            if ($cond == 'id') {
+                $device = $device->where('id', $keyword);
+            }
+            if ($cond == 'device_id') {
+                $device = $device->where('device_id', $keyword);
+            }
+            if ($cond == 'name') {
+                $device = $device->where('name', 'like', '%' . $keyword . '%');
+            }
+            if ($cond == 'device_name') {
+                $device = $device->where('device_name', 'like', '%' . $keyword . '%');
+            }
+        }
+
+        $data_device = $device->get();
+        $result = [];
+        $data = [];
+        foreach ($data_device as $key => $value) {
+            $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
+            $get_location = $this->helpers->getLocation($get_attr);
+            $get_status = $this->helpers->getStatus($get_attr);
+         
+                $data['device'] = $value;
+                $data['location'] = $get_location;
+                $data['status'] = $get_status;
+                $data['date_data'] = Carbon::now();
+           
+             
+            $result[] = $data;
+            
+        }
+        if($cond == 'status' && $keyword == 'online'){
+            $coll = collect($result);
+            $result = $coll->filter(function ($item){
+                return $item['status'] == 1;
+            });
+        }
+        if($cond == 'status' && $keyword == 'offline'){
+            $coll = collect($result);
+            $result = $coll->filter(function ($item){
+                return $item['status'] == 0;
+            });
+        }
+
+
+        return $result;
+    }
 
 }

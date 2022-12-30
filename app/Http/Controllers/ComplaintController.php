@@ -69,6 +69,7 @@ class ComplaintController extends Controller
         $itemPerpage = $request->itemperpage;
         $start = $request->start;
         $search = $request->search;
+        $lang = $request->lang;
 
         $req_reply = $request->reply;
 
@@ -88,7 +89,7 @@ class ComplaintController extends Controller
                 $query->select(['id', 'name']);
             }])->where('name_complaint', $user->name)->orderBy('id', (empty($search['order_by'])) ? 'DESC' : $search['order_by']);
         }
-        $stat = collect($comp->get())->countBy('type');
+        $stat = collect($comp->get())->countBy('type')->toArray();
         $count_all = $comp->count();
 
         if (!empty($search['title'])) {
@@ -146,12 +147,27 @@ class ComplaintController extends Controller
             $list_comp[] = $data;
         }
 
+        
         $data_ = [];
         $data_['list_comp'] = $list_comp;
         $data_['count_all'] = $count_all;
-        $data_['stat'] = $stat;
+        $data_['stat'] = $this->setStatData($stat,$lang);
 
+        
         return response()->json($data_);
+    }  
+    public function setStatData($stat,$lang)
+    {
+        $stat_data = [];
+        foreach ($stat as $key => $value) {
+             $topic = ComplaintTopic::where('complaintType',$key)->first();
+             if(!empty($topic)){
+                $stat_data[$topic->$lang] = $value;
+             }else{
+                $stat_data[$key] = $value;
+             }
+        }
+        return $stat_data;
     }
     public function list_complaint_user_id(Request $request, $user_id)
     {
@@ -344,63 +360,18 @@ class ComplaintController extends Controller
 
         $comp = Complaint::whereBetween('date_complaint', [$start, $end]);
 
-        if ($data == 'sum') {
-            $comp = $comp->get();
-            $collect = collect($comp);
-            $group = $collect->countBy('type');
+        $comp = $comp->get();
+        $collect = collect($comp);
+        $group = $collect->countBy('type');
+        return $group;
 
-            $keys = ['electricity', 'etc', 'water', 'disturbance'];
-            if ($group->count() > 0) {
 
-                foreach ($group as $key2 => $value) {
-
-                    $sdata[$key2] = $value;
-
-                }
-
-            } else {
-                foreach ($keys as $value2) {
-                    $sdata[$value2] = 0;
-                }
-            }
-            return $sdata;
-
-        } else {
-
-            if ($data == 'electricity') {
-                $comp = $comp->where('type', $data)->get();
-                $collect = collect($comp);
-                $group = $collect->countBy('type');
-
-            } elseif ($data == 'etc') {
-                $comp = $comp->where('type', $data)->get();
-                $collect = collect($comp);
-                $group = $collect->countBy('type');
-
-            } elseif ($data == 'water') {
-                $comp = $comp->where('type', $data)->get();
-                $collect = collect($comp);
-                $group = $collect->countBy('type');
-
-            } elseif ($data == 'disturbance') {
-                $comp = $comp->where('type', $data)->get();
-                $collect = collect($comp);
-                $group = $collect->countBy('type');
-            }
-
-            if ($group->count() > 0) {
-                return $group;
-            } else {
-                return json_encode([$data => 0]);
-            }
-
-        }
     }
     public function stat()
     {
         $all = Complaint::count();
         $pending = Complaint::where('status','pending')->count();
-        $received = Complaint::where('status','received')->count();
+        $received = Complaint::where('status','<>','pending')->count();
 
         return response()->json(['all'=>$all,'pending'=>$pending,'received'=>$received]); 
     }

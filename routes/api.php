@@ -7,6 +7,7 @@ use App\Http\Controllers\DataController;
 use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ResponseData\CCTVController;
 use App\Http\Controllers\ResponseData\SOSController;
 use App\Http\Controllers\RoleController;
@@ -31,6 +32,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('get_status/{sensor}', [DataController::class, 'get_status']);
     Route::get('status/all', [DataController::class, 'device_all']);
     Route::post('streaming', [CCTVController::class, 'streaming']);
+    Route::post('streaming/check',[CCTVController::class,'streaming_check']);
     Route::post('chartdata',[ChartDataController::class,'get_data']);
 
     Route::post('logger', [LogController::class, 'save_log']);
@@ -85,6 +87,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('map_data', [DeviceController::class, 'map_data']);
         Route::get('map_data/{id}', [DeviceController::class, 'map_data_device']);
         Route::post('filter', [DeviceController::class, 'filter_data']);
+        Route::post('filter_ds',[DeviceController::class,'filter_data_ds']);
 
     });
 
@@ -107,13 +110,19 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'export'], function () {
         Route::post('csv', [DataExportController::class, 'export_csv']);
-
     });
 
     Route::group(['prefix' => 'sos'], function () {
         Route::get('stat/widget', [SOSController::class, 'stat']);
-
     });
+    Route::group(['prefix' => 'maintenance'], function () {
+        Route::post('store', [MaintenanceController::class, 'store']);
+        Route::post('update/status/{id}',[MaintenanceController::class,'update_status']);
+        Route::post('filter',[MaintenanceController::class,'filter_data']);
+        Route::delete('destroy/{id}',[MaintenanceController::class,'destroy']);
+        Route::get('list',[MaintenanceController::class,'list']);
+    });
+
 });
 
 Route::post('login', [UserController::class, 'login']);

@@ -99,4 +99,9 @@ class RoleController extends Controller
         }
         
     }
+    public function all_role_permission()
+    {
+        $role = Role::orderBy('id', 'ASC');
+        return $role;
+    }
 }
