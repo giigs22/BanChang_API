@@ -52,9 +52,9 @@ class SOSController extends Controller
             $setdata['data'] = $get_data;
             $data[] = $setdata;
         }
-        foreach ($data as $key => $value) {
-            $calls[] = $value['data']->calls;
-        }
-        return $calls;
+        // foreach ($data as $key => $value) {
+        //     $calls[] = $value['data']->calls;
+        // }
+        return $data;
     }
 }

@@ -13,7 +13,7 @@ class MaintenanceController extends Controller
 {
     public function __construct()
     {
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 0);
         $this->api_helper = new ApiHelper;
         $this->helpers = new Helpers;
     }

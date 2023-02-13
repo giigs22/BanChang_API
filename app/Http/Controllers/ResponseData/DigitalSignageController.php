@@ -37,6 +37,22 @@ class DigitalSignageController extends Controller
         return $data;
 
     }
+    public function responseStatus()
+    {
+        $get_attr = $this->api_helper->getAttrDataAPI($this->device);
+        foreach ($get_attr as $key => $value) {
+            foreach ($value as $key2 => $value2) {
+                if ($value2->key == 'active') {
+                    $sdt[] = $value2;
+                }
+            }
+        }
+        $collect = collect($sdt);
+        $group_status = $collect->countBy('value');
+        $status = $this->helpers->statusDevice($group_status);
+        return $status;
+      
+    }
     public function getListDevice()
     {
         $list = Device::where('widget_id', 10)->get();

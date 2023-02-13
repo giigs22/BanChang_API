@@ -12,13 +12,13 @@ class StatDataController extends Controller
 {
     public function __construct()
     {
-        ini_set('max_execution_time', 900);
+        ini_set('max_execution_time', 0);
         $this->api_helper = new ApiHelper;
         $this->helpers = new Helpers;
     }
     public function getData($type)
     {
-        if($type == 'pm25' || $type == 'temp' || $type == 'humid' || $type == 'uv' || $type = 'voc'){
+        if($type == 'pm25' || $type == 'temp' || $type == 'humid' || $type == 'uv' || $type = 'voc' || $type = 'pm10' || $type = 'co2'){
             $device = Device::where('widget_id', '1')->get();
         }
 

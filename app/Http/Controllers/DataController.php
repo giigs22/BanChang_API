@@ -20,7 +20,7 @@ class DataController extends Controller
 {
     public function __construct()
     {
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 0);
     }
     public function get_data($type, $sensor, $option = null)
     {
@@ -105,6 +105,9 @@ class DataController extends Controller
         } elseif ($sensor == 'wifi') {
             $wfCon = new WifiController;
             $data = $wfCon->responseStatus();
+        }elseif($sensor == 'digi_sig'){
+            $digi = new DigitalSignageController;
+            $data = $digi->responseStatus();
         }
         return $data;
     }
