@@ -21,6 +21,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:stat',['humid'])->dailyAt("00:01");
         $schedule->command('command:stat',['uv'])->dailyAt("00:01");
         $schedule->command('command:stat',['voc'])->dailyAt("00:01");
+        $schedule->command('command:stat',['pm10'])->dailyAt("00:01");
+        $schedule->command('command:stat',['co2'])->dailyAt("00:01");
     }
 
     /**
