@@ -96,7 +96,7 @@ class CCTVController extends Controller
     }
     public function streaming(Request $request)
     {
-        $url = "http://cctv.banchang.online/restreaming";
+        $url =  env("CCTV_URL_STREAMING");
         $response = Http::post($url, ["url_rtsp" => $request->url_rtsp]);
         $data = json_decode($response);
 
