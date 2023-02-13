@@ -56,18 +56,17 @@ class Helpers
     }
     public function setDayHourRange($data)
     {
-        $start = Carbon::createFromTimestampMs($data['start'], config('app.timezone'));
-
-        $s = $start->startOfDay()->toDayDateTimeString();
-        $e = $start->endOfDay()->toDayDateTimeString();
-
-        $pre = CarbonInterval::hours(1)->toPeriod($s, $e);
-
-        foreach ($pre as $key => $value) {
-            $list_time[] = $value->valueOf();
+        $con_ts = Carbon::createFromTimestampMs($data['start'])->toDateString();
+        $list = [];
+        
+        for ($i=0; $i < 24; $i++) {
+            $start = Carbon::parse($con_ts.'00:00')->toDateTimeString(); 
+            $d = Carbon::create($start);
+            $s = $d->addHours($i)->toDateTimeString();
+            $e = Carbon::parse($s)->addMinutes(59)->toDateTimeString();
+            $list[] = [Carbon::parse($s)->valueOf(),Carbon::parse($e)->valueOf()]; 
         }
-        return $list_time;
-
+        return $list;
     }
     public function setDayRange($option)
     {
