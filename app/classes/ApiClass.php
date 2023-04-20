@@ -8,12 +8,14 @@ class ApiHelper
     public $api_url;
     public $api_last;
     public $api_attr;
+    public $api_event;
 
     public function __construct()
     {
         $this->api_url = env("API_DATA_URL");
         $this->api_last = env("API_LAST_DATA");
         $this->api_attr = env("API_ATTR_DATA");
+        $this->api_event = env("API_EVENT_DATA");
     }
 
     public function getLastDataAPI($device)
@@ -70,6 +72,20 @@ class ApiHelper
             'keys' => $key,
             'startTs' => $start,
             'endTs' => $end,
+        ]);
+        $data = json_decode($response);
+
+        return $data;
+    }
+    public function getEventByKey($key,$start,$end)
+    {
+        $end_point = $this->api_event;
+        $url_full = $this->getFullUrl($end_point);
+
+        $response = Http::get($url_full, [
+            'startTs' => $start,
+            'endTs' => $end,
+            'eventType' => $key,
         ]);
         $data = json_decode($response);
 

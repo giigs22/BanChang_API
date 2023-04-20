@@ -13,6 +13,7 @@ use App\Http\Controllers\ResponseData\SmartPoleController;
 use App\Http\Controllers\ResponseData\SOSController;
 use App\Http\Controllers\ResponseData\WifiController;
 use App\Models\Device;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -55,8 +56,7 @@ class DataController extends Controller
                 }
             } elseif ($sensor == 'cctv_sur') {
                 if ($option == 'chartdata') {
-                    $setdata = $cctvCon->responseData();
-                    $data = $cctvCon->groupSur($setdata);
+                    $data = $cctvCon->groupSur('today'); 
                 }
             } elseif ($sensor == 'smart_light') {
                 if ($option == 'view') {
@@ -80,6 +80,14 @@ class DataController extends Controller
             }elseif($sensor == 'license_plate'){
                 $data = $license->responseData();
             }
+        }
+        if($type == "history"){
+            if ($sensor == 'cctv_sur') {
+                if ($option == 'chartdata') {
+                    $data = $cctvCon->groupSur('month'); 
+                }
+            }
+
         }
 
         return $data;

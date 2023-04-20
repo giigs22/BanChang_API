@@ -6,6 +6,7 @@ use App\Classes\ApiHelper;
 use App\Classes\Helpers;
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -71,20 +72,24 @@ class CCTVController extends Controller
         $list = Device::where('widget_id', 4)->get();
         return $list;
     }
-    public function groupSur($data)
+    public function groupSur($type)
     {
-        //$keys = ['faceReg_alllist_daily', 'faceReg_blacklist_daily', 'tracking_daily', 'wrongDirection_daily', 'prohibitedArea_daily', 'prohibitedParking_daily', 'lpr_allplate_daily', 'lpr_blacklist_daily'];
-        $keys = ['faceReg_alllist','face_recognition','tracking','wrong_direction','wrongDirection','no_park','traffic_rate'];
-        $group_data = [];
-        foreach ($data as $key => $value) {
-            $data2 = $value;
-            foreach ($data2 as $key2 => $value2) {
-                if (in_array($key2, $keys)) {
-                    $group_data[$key2][] = $value2;
-                }
-            }
+        $keys = ["face_recognition","camera_mulfunction","trespasser","suspected_face_detection","group_cluster_detection","traffic_violation","parking_violation"];
+        
+        if($type == "month"){
+            $date_ts = $this->getDateMonth();
         }
-        return $group_data;
+        else{
+            $date_ts = $this->getDateToday();
+        }
+        $group_data = [];
+            foreach ($keys as $key) {
+               $data =  $this->api_helper->getEventByKey($key,$date_ts[0],$date_ts[1]);
+               $group_data[$key] = $data;
+        }
+        $sum_data = $this->sumGroup($group_data);
+        return $sum_data;
+
     }
     public function getRTSP($data)
     {
@@ -108,6 +113,50 @@ class CCTVController extends Controller
         $response = Http::get($url);
         
         return $response->status();
+    }
+    public function getDateMonth()
+    {
+            $today = Carbon::today();
+            $month = $today->month;
+            $first = Carbon::create($today->year, $month, 1);
+            $last = $today->endOfMonth()->format('Y-m-d');
+            
+
+            $start = $first->format('Y-m-d H:i:i');
+            $end = $last." 23:59:59";
+
+
+            $s_ts = Carbon::create($start)->valueOf();
+            $e_ts = Carbon::create($end)->valueOf();
+
+            return [$s_ts,$e_ts];
+    }
+    public function getDateToday()
+    {
+        $today = Carbon::today();
+       
+       
+
+        $start = $today->format('Y-m-d H:i:i');
+        $end = $today->format('Y-m-d')." 23:59:59";
+
+        $s_ts = Carbon::create($start)->valueOf();
+        $e_ts = Carbon::create($end)->valueOf();
+
+         return [$s_ts,$e_ts];
+
+    }
+    public function sumGroup($data)
+    {
+        
+        foreach ($data as $key => $value) {
+            $sum = 0;
+            foreach ($value as $key2 => $value2) {
+                $sum += (int)$value2->event_count;
+            }
+            $dt[$key] = $sum; 
+        }
+        return $dt;
     }
 
 }
