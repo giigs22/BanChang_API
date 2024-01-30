@@ -342,10 +342,10 @@ class DeviceController extends Controller
             $data['data'] = $process_data;
             $data['location'] = $get_location;
             $data['status'] = $get_status;
-            $data['date_data'] = ['start'=>$con_start,'end'=>$con_end,'diff'=>$diff]; 
+            $data['date_data'] = ['start'=>$con_start,'end'=>$con_end,'diff'=>$diff];
 
             $result[] = $data;
-            
+
         }
 
         return $result;
@@ -380,16 +380,16 @@ class DeviceController extends Controller
             }
             return $sdata;
         }
-        
+
     }
     public function filter_data_ds(Request $request)
     {
         $widget = $request->widget;
         $cond = isset($request->filter['cond'])?$request->filter['cond']:"";
         $keyword = isset($request->filter['keyword'])?$request->filter['keyword']:"";
-   
+
         $device = Device::where('widget_id', '10');
-      
+
 
         if (!empty($cond)) {
             if ($cond == 'id') {
@@ -413,15 +413,15 @@ class DeviceController extends Controller
             $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
             $get_location = $this->helpers->getLocation($get_attr);
             $get_status = $this->helpers->getStatus($get_attr);
-         
+
                 $data['device'] = $value;
                 $data['location'] = $get_location;
                 $data['status'] = $get_status;
                 $data['date_data'] = Carbon::now();
-           
-             
+
+
             $result[] = $data;
-            
+
         }
         if($cond == 'status' && $keyword == 'online'){
             $coll = collect($result);
@@ -438,6 +438,67 @@ class DeviceController extends Controller
 
 
         return $result;
+    }
+    public function filter_data_sos(Request $request)
+    {
+        $widget = $request->widget;
+        $cond = isset($request->filter['cond'])?$request->filter['cond']:"";
+        $keyword = isset($request->filter['keyword'])?$request->filter['keyword']:"";
+        $start_date = $request->filter['start_date'];
+        $end_date = $request->filter['end_date'];
+
+        $con_start = Carbon::createFromTimestampMs($start_date);
+        $con_end = Carbon::createFromTimestampMs($end_date);
+        $diff = $con_start->diffInDays($con_end);
+
+        //DB::enableQueryLog();
+
+            $device = Device::where('widget_id','12');
+            $keys_data= ['calls'];
+
+
+        if (!empty($cond)) {
+            if ($cond == 'id') {
+                $device = $device->where('id', $keyword);
+            }
+            if ($cond == 'device_id') {
+                $device = $device->where('device_id', $keyword);
+            }
+            if ($cond == 'name') {
+                $device = $device->where('name', 'like', '%' . $keyword . '%');
+            }
+            if ($cond == 'device_name') {
+                $device = $device->where('device_name', 'like', '%' . $keyword . '%');
+            }
+        }
+
+        $data_device = $device->get();
+        $result = [];
+        foreach ($data_device as $key => $value) {
+            $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
+            $get_location = $this->helpers->getLocation($get_attr);
+            $get_status = $this->helpers->getStatus($get_attr);
+            $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, null, $start_date, $end_date, null);
+            $process_data = $this->processDataSOS($get_data->all);
+
+            $data['device'] = $value;
+            $data['data'] = $process_data;
+            $data['location'] = $get_location;
+            $data['status'] = $get_status;
+            $data['date_data'] = ['start'=>$con_start,'end'=>$con_end,'diff'=>$diff];
+
+            $result[] = $data;
+
+        }
+
+        return $result;
+    }
+    public function processDataSOS($data){
+        $sum_val = 0;
+        foreach ($data as $key => $value) {
+            $sum_val = $sum_val + (empty($value->calls[0]->value))?0:count($value->calls[0]->value);
+        }
+        return $sum_val;
     }
 
 }

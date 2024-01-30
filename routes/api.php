@@ -88,6 +88,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('map_data/{id}', [DeviceController::class, 'map_data_device']);
         Route::post('filter', [DeviceController::class, 'filter_data']);
         Route::post('filter_ds',[DeviceController::class,'filter_data_ds']);
+        Route::post('filter_sos',[DeviceController::class,'filter_data_sos']);
+
 
     });
 
