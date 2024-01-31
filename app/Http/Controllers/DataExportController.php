@@ -49,7 +49,7 @@ class DataExportController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
                     $get_status = $this->helpers->getStatus($get_attr);
-                    if(array_key_exists('statusCode',$get_data)){
+                    if(array_key_exists('statusCode',(array) $get_data)){
                         $get_data = [];
                     }
                     $get_avg = $this->AvgData($get_data);
@@ -62,7 +62,7 @@ class DataExportController extends Controller
                     $list_group_data[] = $sdata;
 
                     $get_data2 = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data2, $option['start'], $option['end'], null);
-                    if(array_key_exists('statusCode',$get_data2)){
+                    if(array_key_exists('statusCode',(array) $get_data2)){
                         $get_data2 = [];
                     }
                     $get_avg2 = $this->AvgData($get_data2);
@@ -96,7 +96,7 @@ class DataExportController extends Controller
                     $get_attr = $this->api_helper->getAttrDataAPIByDevice($value->device_id);
                     $get_location = $this->helpers->getLocation($get_attr);
                     $get_status = $this->helpers->getStatus($get_attr);
-                    if(array_key_exists('statusCode',$get_data)){
+                    if(array_key_exists('statusCode',(array) $get_data)){
                         $get_data = [];
                     }
                     $get_avg = $this->AvgData($get_data);
@@ -109,7 +109,7 @@ class DataExportController extends Controller
                     $list_group_data[] = $sdata;
 
                     $get_data2 = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data2, $option['start'], $option['end'], null);
-                    if(array_key_exists('statusCode',$get_data2)){
+                    if(array_key_exists('statusCode',(array) $get_data2)){
                         $get_data2 = [];
                     }
                     $get_avg2 = $this->AvgData($get_data2);
@@ -146,7 +146,7 @@ class DataExportController extends Controller
                             $get_location = $this->helpers->getLocation($get_attr);
                             $get_status = $this->helpers->getStatus($get_attr);
 
-                            if(array_key_exists('statusCode',$get_data)){
+                            if(array_key_exists('statusCode',(array) $get_data)){
                                 $get_data = [];
                             }
                             $get_avg = $this->AvgData($get_data);
@@ -174,7 +174,7 @@ class DataExportController extends Controller
                     $get_location = $this->helpers->getLocation($get_attr);
                     $get_status = $this->helpers->getStatus($get_attr);
 
-                    if(array_key_exists('statusCode',$get_data)){
+                    if(array_key_exists('statusCode',(array) $get_data)){
                         $get_data = [];
                     }
 
@@ -206,10 +206,10 @@ class DataExportController extends Controller
                     foreach ($daysList as $key2 => $date) {
                         $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data, $date[0], $date[1], null);
                         $get_data2 = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data2, $date[0], $date[1], null);
-                        if(array_key_exists('statusCode',$get_data)){
+                        if(array_key_exists('statusCode',(array) $get_data)){
                             $get_data = [];
                         }
-                        if(array_key_exists('statusCode',$get_data2)){
+                        if(array_key_exists('statusCode',(array) $get_data2)){
                             $get_data2 = [];
                         }
 
@@ -273,10 +273,10 @@ class DataExportController extends Controller
                     foreach ($daysList as $key2 => $date) {
                         $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data, $date[0], $date[1], null);
                         $get_data2 = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data2, $date[0], $date[1], null);
-                        if(array_key_exists('statusCode',$get_data)){
+                        if(array_key_exists('statusCode',(array) $get_data)){
                             $get_data = [];
                         }
-                        if(array_key_exists('statusCode',$get_data2)){
+                        if(array_key_exists('statusCode',(array) $get_data2)){
                             $get_data2 = [];
                         }
 
@@ -344,7 +344,7 @@ class DataExportController extends Controller
                                     $get_location = $this->helpers->getLocation($get_attr);
                                     $get_status = $this->helpers->getStatus($get_attr);
 
-                                    if(array_key_exists('statusCode',$get_data)){
+                                    if(array_key_exists('statusCode',(array) $get_data)){
                                         $get_data = [];
                                     }
 
@@ -395,7 +395,7 @@ class DataExportController extends Controller
                 foreach ($device as $key => $value) {
                     foreach ($daysList as $key2 => $date) {
                         $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data, $date[0], $date[1], null);
-                        if(array_key_exists('statusCode',$get_data)){
+                        if(array_key_exists('statusCode',(array) $get_data)){
                             $get_data = [];
                         }
 
@@ -432,7 +432,7 @@ class DataExportController extends Controller
                 foreach ($device as $key => $value) {
                     foreach ($daysList as $key2 => $date) {
                         $get_data = $this->api_helper->getHistoryAPIByDevice($value->device_id, $data, $date[0], $date[1], null);
-                        if(array_key_exists('statusCode',$get_data)){
+                        if(array_key_exists('statusCode',(array) $get_data)){
                             $get_data = [];
                         }
 
