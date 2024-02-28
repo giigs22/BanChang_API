@@ -286,7 +286,7 @@ class DeviceController extends Controller
     public function filter_data(Request $request)
     {
         $widget = $request->widget;
-        $cond = isset($request->filter['cond'])?$request->filter['cond']:"";
+        //$cond = isset($request->filter['cond'])?$request->filter['cond']:"";
         $keyword = isset($request->filter['keyword'])?$request->filter['keyword']:"";
         $start_date = $request->filter['start_date'];
         $end_date = $request->filter['end_date'];
@@ -299,7 +299,7 @@ class DeviceController extends Controller
 
         if ($widget == 'env') {
             $device = Device::where('widget_id', '1');
-            $keys_data = ['co2','pm25','pm10','humid','uv','voc','temp'];
+            $keys_data = ['co2','pm25','pm10','humidity','uv','voc','temperature'];
         }
         if ($widget == 'smlight') {
             $device = Device::where('widget_id', '2');
@@ -311,23 +311,29 @@ class DeviceController extends Controller
         }
         if($widget == 'wifi'){
             $device = Device::where('widget_id','9');
-            $keys_data= ['energy'];
+            $keys_data= ['client'];
         }
 
-        if (!empty($cond)) {
-            if ($cond == 'id') {
-                $device = $device->where('id', $keyword);
-            }
-            if ($cond == 'device_id') {
-                $device = $device->where('device_id', $keyword);
-            }
-            if ($cond == 'name') {
-                $device = $device->where('name', 'like', '%' . $keyword . '%');
-            }
-            if ($cond == 'device_name') {
-                $device = $device->where('device_name', 'like', '%' . $keyword . '%');
-            }
+        if(!empty($keyword)){
+            $device = $device->where('device_id', $keyword)
+            ->orwhere('device_name', 'like', '%' . $keyword . '%');
         }
+
+
+        // if (!empty($cond)) {
+        //     if ($cond == 'id') {
+        //         $device = $device->where('id', $keyword);
+        //     }
+        //     if ($cond == 'device_id') {
+        //         $device = $device->where('device_id', $keyword);
+        //     }
+        //     if ($cond == 'name') {
+        //         $device = $device->where('name', 'like', '%' . $keyword . '%');
+        //     }
+        //     if ($cond == 'device_name') {
+        //         $device = $device->where('device_name', 'like', '%' . $keyword . '%');
+        //     }
+        // }
 
         $data_device = $device->get();
         $result = [];
